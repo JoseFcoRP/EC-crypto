@@ -1,0 +1,516 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Plantilla de memoria en LaTeX para la ETSIT - Universidad Rey Juan Carlos
+%%
+%% Por Gregorio Robles <grex arroba gsyc.urjc.es>
+%%     Grupo de Sistemas y Comunicaciones
+%%     Escuela Técnica Superior de Ingenieros de Telecomunicación
+%%     Universidad Rey Juan Carlos
+%% (muchas ideas tomadas de Internet, colegas del GSyC, antiguos alumnos...
+%%  etc. Muchas gracias a todos)
+%%
+%% La última versión de esta plantilla está siempre disponible en:
+%%     https://github.com/gregoriorobles/plantilla-memoria
+%%
+%% Para obtener PDF, ejecuta en la shell:
+%%   make
+%% (las imágenes deben ir en PNG o JPG)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[a4paper, 12pt]{book}
+%\usepackage[T1]{fontenc}
+
+\usepackage[a4paper, left=2.5cm, right=2.5cm, top=3cm, bottom=3cm]{geometry}
+\usepackage{times}
+\usepackage[latin1]{inputenc}
+\usepackage[spanish]{babel} % Comenta esta línea si tu memoria es en inglés
+\usepackage[latin1]{inputenx}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{url}
+%\usepackage[dvipdfm]{graphicx}
+\usepackage{graphicx}
+\usepackage{float}  %% H para posicionar figuras
+\usepackage[nottoc, notlot, notlof, notindex]{tocbibind} %% Opciones de índice
+\usepackage{latexsym}  %% Logo LaTeX
+\usepackage{schemata}
+\usepackage{mathtools}
+\title{Memoria del Proyecto}
+\author{Nombre del autor}
+
+\renewcommand{\baselinestretch}{1.5}  %% Interlineado
+
+\DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
+
+\begin{document}
+
+\renewcommand{\refname}{Bibliografía}  %% Renombrando
+\renewcommand{\appendixname}{Apéndice}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% PORTADA
+
+\begin{titlepage}
+\begin{center}
+\begin{tabular}[c]{c c}
+%\includegraphics[bb=0 0 194 352, scale=0.25]{logo} &
+\includegraphics[scale=0.25]{img/logo_vect.png} &
+\begin{tabular}[b]{l}
+\Huge
+\textsf{UNIVERSIDAD} \\
+\Huge
+\textsf{REY JUAN CARLOS} \\
+\end{tabular}
+\\
+\end{tabular}
+
+\vspace{3cm}
+
+\Large
+DOBLE GRADO INGENIERÍA DEL SOFTWARE Y MATEMÁTICAS
+
+\vspace{0.4cm}
+
+\large
+Curso Académico 2018/2019
+
+\vspace{0.8cm}
+
+Trabajo Fin de Grado
+
+\vspace{2.5cm}
+
+\LARGE
+Criptografía sobre curvas elípticas. Cifrado basado en identidades.
+
+\vspace{4cm}
+
+\large
+Autor : José Francisco Rodríguez Peña \\
+Tutor : Ángel Luis Pérez del Pozo
+\end{center}
+\end{titlepage}
+
+\newpage
+\mbox{}
+\thispagestyle{empty} % para que no se numere esta pagina
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%% Resumen
+
+\chapter*{Objetivo}
+%\addcontentsline{toc}{chapter}{Resumen} % si queremos que aparezca en el índice
+\markboth{OBJETIVO}{OBJETIVO} % encabezado
+El objetivo de este trabajo es tener un primer contacto con el estudio de la criptografía, haciendo énfasis en la criptografía de clave pública y la teoría necesaria para definir la criptografía sobre curva elíptica. Finalmente se estudiará un esquema de cifrado basado en identidades sobre curvas elípticas.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ÍNDICES %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Las buenas noticias es que los índices se generan automáticamente.
+% Lo único que tienes que hacer es elegir cuáles quieren que se generen,
+% y comentar/descomentar esa instrucción de LaTeX.
+
+%%%% Índice de contenidos
+\tableofcontents 
+%%%% Índice de figuras
+%\cleardoublepage
+%\addcontentsline{toc}{chapter}{Lista de figuras} % para que aparezca en el indice de contenidos
+%\listoffigures % indice de figuras
+%%%% Índice de tablas
+%\cleardoublepage
+%\addcontentsline{toc}{chapter}{Lista de tablas} % para que aparezca en el indice de contenidos
+%\listoftables % indice de tablas
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% INTRODUCCIÓN %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\cleardoublepage
+\chapter{Introducción}
+La criptografía es la parte de la ciencia encargada de tratar la información de manera segura en presencia de adversarios, una de sus ramas es el cifrado de datos, que se encarga de poder intercambiar mensajes manteniendo la \textit{confidencialidad}. Para esto se hace uso de alguna transformación del mensaje de forma que no pueda ser recuperada ninguna información útil y que solo los receptores legítimos del mensaje puedan volver a transformarlo en el mensaje original, estas transformaciones son llamadas \textit{cifrado} y \textit{descifrado} respectivamente.\\
+Las primeras técnicas para cifrar mensajes consistían en sustituir todas las letras del mensaje mediante alguna tabla o relación, en concreto en el cifrado César se alternaban por su correspondiente en el alfabeto desplazada un número de posiciones, este número era la clave del cifrado y para descifrar bastaba con realizar el mismo desplazamiento en sentido inverso, dada la poca cantidad de claves posibles para este cifrado es muy fácil de romper por fuerza bruta, sin embargo una de las formas más ingeniosas para romperlo consiste en analizar la distribución de letras en el idioma del mensaje y, si este es suficientemente largo, se puede detectar el desplazamiento en esa distribución.\\
+\includegraphics[scale=0.4]{img/Caesar3.png}\\
+En el siglo XV aparece el cifrado Vigènere que consistía en una palabra clave que se usaba para desplazar las letras del mensaje, por ejemplo si la clave es 'ABC' los desplazamientos serían 1, 2 y 3 posiciones respectivamente, y se repetía esta clave hasta acabar por completo el mensaje.\\
+La criptografía estuvo ligada fuertemente al uso militar y durante los siglos XIX y XX tuvo una importancia fundamental con la maquina Enigma, en este periodo de tiempo se invirtió un gran esfuerzo en desarrollar este área dando lugar a grandes avances.\\
+Posteriormente a la Segunda Guerra Mundial se realizaron muchos estudios teóricos y en los años 70 se crearon algunos estándares de algoritmos de cifrado, con la evolución de la informática desde entonces existe una actualización constante de algoritmos cada vez mas seguros ya que la capacidad de cómputo es mayor.\\
+Es habitual agrupar los algoritmos según la cantidad de claves que son necesarias al cifrar y descifrar:
+\begin{itemize}
+\item Criptografía simétrica: Estos métodos utilizan la misma clave para cifrar y descifrar mensajes, las distintas partes que intercambian información deben conocer esta clave de antemano, existen distintos algoritmos que ponen esto en practica, uno de los mas conocidos entre los métodos recientes es DES (Data Encryption Standard), diseñado en los años 70 y reemplazado a día de hoy por AES (Advanced Encryption Standard).
+\item Ciptografía asimétrica: También conocida como criptografía de clave pública, se basa en un par de claves, una pública que se debe dejar a disposición de cualquiera y una privada que se debe mantener en secreto. Este tipo de métodos son utilizados para el cifrado basado en identidad y el cifrado basado en certificados.
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% OBJETIVOS %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\cleardoublepage
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% DESARROLLO %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\cleardoublepage % empezamos en página impar
+\chapter{Herramientas matemáticas}
+\section{Grupo cíclico}
+Sea $G$ un grupo, se dice que $G$ es un \textit{grupo cíclico} si existe un elemento del grupo $g\in G$ de forma que $G=\left\langle g \right\rangle$, es decir, cualquier elemento del grupo puede expresarse como $g^n$ (o $ng$ si es un grupo aditivo) para algún $n\in\mathbb{N}$, denotamos entonces $g$ como \textit{generador} de $G$ y $\left\langle g \right\rangle$ como su base.
+Un ejemplo habitual de grupo cíclico es el grupo aditivo de los números enteros módulo $n$, denotado habitualmente como $\mathbb{Z}/n\mathbb{Z}$, tomando como generador el $1$.\\
+\underline{Lema}: Cada grupo cíclico finito de orden $n$ es isomorfo al grupo $\mathbb{Z}/n\mathbb{Z}$.
+
+\section{Logaritmo discreto}
+\label{chap:logaritmo discreto}
+Para algunos algoritmos de critografía necesitamos una función que sea fácil de aplicar pero difícil de invertir a nivel de tiempo de cómputo, por ello vamos a ver el caso del logaritmo discreto.\\
+Dado un grupo cíclico finito $G$ con base $\left\langle g \right\rangle$, tenemos que:
+\[
+y=g^x \Longleftrightarrow x =\log_{g}(y)
+\]
+Por un lado tenemos la \textit{exponenciación discreta}, es decir, $g^x$ cuando $x$ es conocido, esta operación se puede calcular con el algoritmo recursivo de exponenciación binaria, con complejidad $\cal{O} $($\log n$).\\
+No obstante el problema de calcular $x =\log_{g}(y)$ es más difícil, el algoritmo Baby-step/Giant-step tiene complejidad $\cal{O} $($\sqrt{p}$), asumiendo que el grupo tiene orden primo $p$.
+\section{Exponenciación binaria}
+Para calcular $g^x$, tenemos que hacer la operación recursiva $F$ definida de la siguiente forma:\\
+\schema{\schemabox{$F(x^n)= $}}{
+\schemabox{
+$x$ si $n=1$\\
+$\left( F(x^\frac{n}{2}) \right)^2$ si $n$ es par\\
+$F(x^{(n-1)})\cdot x$ si $n$ es impar
+}
+}\\
+Puesto que en cada operación reducimos el exponente $n$ a la mitad, tenemos que realizar 
+$\ceil{\log_{2}(n)}$ operaciones, por tanto este problema se puede resolver en $\cal{O} $($\log n$).\\
+
+\section{Algoritmo Baby-step/Giant-step}
+Queremos conocer $x$ en la ecuación $h=g^x$, sea $p$ el orden del grupo $G$.\\
+Descompondremos nuestra solución en:
+\[
+x=x_0+x_1\ceil*{\sqrt{p}}
+\]
+Puesto que $x<p$, entonces $0\leq x_0,x_1<\ceil*{\sqrt{p}}$.\\
+En primer lugar calcularemos los \textit{baby-step}, esto es:
+\[
+g_i=g^i\ t.q.\ 0\leq i<\ceil*{\sqrt{p}}
+\]
+Tras ello calcularemos los \textit{giant-step}, esto es:
+\[
+h_j=hg^{-j\ceil*{\sqrt{p}}}\ t.q.\ 0<j<\ceil*{\sqrt{p}}
+\]
+Una forma eficiente de almacenar estos resultados es con una tabla hash almacenando los pares $(g_i,i)$ y $(h_j,j)$ respectivamente.\\
+Ahora intentamos encontrar una coincidencia tal que $g_i=h_j$, si esto ocurre tenemos que:
+\[
+x_0=i, x_1=j
+\]
+Ya que
+\[
+g^i=hg^{-j\ceil*{\sqrt{p}}}\Rightarrow g^{i+j\ceil*{\sqrt{p}}}=h
+\]
+Dado que para calcular los \textit{baby-step} y los \textit{giant-step} son necesarias como mucho $2\ceil*{\sqrt{p}}$ operaciones, y para buscar una coincidencia solo es necesario tener almacenados los pares (clave,valor) de forma $(i,g_i)$ y $(h_j,j)$ para ver si existe la clave $g_i$ en el segundo hash map, por tanto encontrando una coincidencia, puesto que comprobar una clave es $\cal{O}$(1) y  se recorren únicamente los $g_i$ tenemos de nuevo $\ceil*{\sqrt{p}}$ operaciones, por lo que este algoritmo es de complejidad  $\cal{O} $($\sqrt{p}$).
+
+
+\cleardoublepage
+\chapter{Curvas elípticas} % título del capítulo (se muestra)
+\label{chap:curvas-elipticas} % identificador del capítulo (no se muestra, es para poder referenciarlo)
+
+\section{Definiciones} % título de sección (se muestra)
+\label{sec:def-curva-eliptica} % identificador de sección (no se muestra, es para poder referenciarla)
+\subsection{Plano proyectivo}
+Sea $K$ un cuerpo, \textit{el plano proyectivo} $\mathbb{P}^2(K)$ definido sobre $K$ son la tripletas:
+\[(X,Y,Z)\ t.q.\ X,Y,Z\in K\]
+Donde $X,Y,Z$ no son simultáneamente 0 y definimos la relación de equivalencia:
+\[(X,Y,Z)\equiv(X',Y'.Z') \Longleftrightarrow \exists \lambda \in K\ t.q.\ X=\lambda X',\ Y=\lambda Y',\ Z=\lambda Z' \]
+\subsection{Curva elíptica}
+Una \textit{curva elíptica} se define sobre el conjunto de soluciones de la ecuación Weierstrass homogénea de la forma:
+\begin{equation} 
+E:\ Y^2Z + a_1XYZ + a_3YZ^2 = X^3 + a_2X^2Z + a_4XZ^2 + a_6Z^3 \label{eq:proy-eliptic}
+\end{equation}
+donde $a_1,a_2,a_3,a_4,a_6\in K$, esta notación es conocida como forma larga Weierstrass. Dicha curva debe ser no singular, es decir, si la escribimos de la forma $F(X,Y,Z)=0$, las derivadas parciales no deben ser cero simultáneamente en ningún punto de la curva.
+El conjunto de los \textit{puntos K-racionales} en $E$ son la solución de la ecuación \ref{eq:proy-eliptic} y lo denotaremos $E(K)$. Destacar que la curva tiene exactamente un punto racional con coordenada $Z$ igual a cero, el $(0,1,0)$, este es el punto en el infinito y lo denotaremos como $\cal{O}$.
+\section{Paso al plano afín}
+Si tomamos la ecuación \ref{eq:proy-eliptic} y definimos el cambio de forma que:
+\begin{itemize}
+\item El punto $\cal{O}$ se toma como el infinito en cualquier dirección en $K^2$.
+\item Un punto en el plano proyectivo con $Z\not= 0$ como $\left(\dfrac{X}{Z},\dfrac{Y}{Z}\right)$ en $K^2$.
+\item Para volver al plano proyectivo se toma cualquier $Z\in K$ y se calcula  $\left( X\cdot Z,Y\cdot Z, Z\right)$.
+\end{itemize}
+Con este cambio la curva queda definida por:
+\begin{equation}
+E:\ Y^2 + a_1 XY + a_3 Y = X^3 + a_2 X^2 + a_4 X + a_6  \label{eq:afin-eliptic}
+\end{equation}
+con $a_1,a_2,a_3,a_4,a_6 \in K$
+
+Es posible demostrar (se demuestra en \cite[pag. 25-26]{Nigel}) que dada cualquier curva de la forma \ref{eq:afin-eliptic}, existe un isomorfismo a la curva que llamaremos \textit{forma corta Weierstrass}:
+\begin{equation}
+E:\ Y^2 = X^3 + aX + b
+\end{equation}
+donde $a,b\in K$
+
+\section{Ley de grupo}
+
+Definimos la \textit{suma de puntos}, sea $P,Q \in E$, entonces:
+\begin{itemize}
+\item Se toma la recta que une $P$ y $Q$.
+\item Se calcula el punto de corte de la recta y la curva $E$ al que llamaremos $R$.
+\item $P+Q$ se define como el simétrico de $R$ respecto al eje x.
+\end{itemize}
+\includegraphics[scale=1]{img/Curva.png}
+\underline{Observación:}\\
+$\left[2\right]P=P+P$ se calcula usando la recta tangente a la curva en el punto $P$, por lo que si la tangente es una recta vertical se considera que $P+P=\cal{O}$.\\
+
+De manera algebraica definimos la \textit{suma de puntos} como:
+
+Sea la curva de la forma
+\[E:\ Y^2 + a_1 XY + a_3 Y = X^3 + a_2 X^2 + a_4 X + a_6 \]
+y los puntos de la curva $P_1=(x_1,y_1), P_2=(x_2,y_2)$. Entonces $-P_1=(x_1,-y_1-a_1x_1-a_3)$.
+Tomamos $\lambda$,$\mu$ :\\
+\schema{\schemabox{}}{
+\schemabox{
+$x_1\not=x_2$  \schema{\schemabox{}}{\schemabox{$\lambda=\dfrac{y_2-y_1}{x_2-x_1}$\\$ \mu=\dfrac{y_1x_2-y_2x_1}{x_2-x_1}$}}\\
+$x_1=x_2,P_2\not=P_1$  \schema{\schemabox{}}{{\schemabox{$\lambda=\dfrac{3x_1^2+2a_2x_1+a_4-a_1y_1}{2y_1+a_1x_1+a_3}$\\$ \mu=\dfrac{-x_1^3+a_4x_1+2a_6-a_3y_1}{2y_1+a_1x_1+a_3}$}}}
+}
+}\\
+
+Entonces si $P_3=(x_3,y_3)=P_1+P_2\not=\cal{O}$ se puede calcular $x_3$ e $y_3$ como:
+\begin{equation*}
+\begin{split}
+x_3&=\lambda^2+a_1\lambda-a_2-x_1-x_2,\\
+y_3&=-(\lambda+a_1)x_3-\mu-a_3
+\end{split}
+\end{equation*}
+
+\underline{Nota:}\\
+Para un entero positivo $m$ tenemos que $\left[m\right] $ denota la aplicación de la \textit{multiplicación-por-m} de la curva en si misma.
+Esta aplicación lleva un punto $P$ a $\underbrace{P+P+...+P}_{m\ veces}$.\\
+Esta aplicación será la base de la criptografía sobre curvas elípticas ya que se considera fácil de computar pero difícil de invertir como hemos visto en el capítulo \ref{chap:logaritmo discreto}.
+
+\section{Curvas elípticas sobre cuerpos finitos}
+Sobre un cuerpo finito $\mathbb{F}_q$ el número de puntos racionales de la curva es finito y queda determinado por:
+\[
+\#E(\mathbb{F}_q)=q+1-t
+\]
+Donde $t$ se conoce como la traza de Frobenius.\\
+\underline{Teorema de Hasse}: $t$ cumple que $|t|<2\sqrt{q}$.\\
+La aplicación $q^{th}$-potencia de Frobenius de la curva $E$ definida sobre $\mathbb{F}_q$ es:\\
+\schema{\schemabox{$\varphi$}}{\schemabox{$E(\overline{\mathbb{F}_q})\rightarrow E(\overline{\mathbb{F}_q})$\\$(x,y)\rightarrow (x^q,y^q)$\\$\cal{O}\rightarrow \cal{O}$}}\\
+Esta aplicación es un endomorfismo que respeta la operación de la ley de grupo $\varphi (P+Q)=\varphi (P)+\varphi (Q)$\\
+
+
+\cleardoublepage
+\chapter{Intercambio de claves}
+En algunos algoritmos es necesario que partes no autentificadas lleguen a intercambiar claves por un canal no seguro, esto supuso un problema que solventaron Whitfield Diffie y Martin Hellman con su protocolo, se utiliza para acordar claves simétricas en una sesión y esto posteriormente permite los protocolos de comunicación autentificada. Su seguridad tiene origen en el problema del logaritmo discreto ya que, como hemos visto antes en el capítulo\ref{chap:logaritmo discreto}, es fácil de computar y difícil de invertir.\\
+Supongamos que tenemos dos usuarios finales que quieren comunicarse entre sí, sean estos Alice y Bob, el protocolo Difie-Hellman en una versión simple sigue los siguientes pasos:
+\begin{itemize}
+\item Fijar un primo $p$ y un generador del grupo $g\in \mathbb{Z}^*_p$. Estos valores son conocidos para cualquiera que tenga acceso al canal donde se intercambian.
+\item Alice elige un $a\in \mathbb{Z}_{p-1}$, computa $A = g^a\ mod\ p$ y lo envía a Bob.
+\item Bob elige un $b\in \mathbb{Z}_{p-1}$, computa $B = g^b\ mod\ p$ y lo envía a Alice.
+\end{itemize}
+Con esta información ambos extremos son capaces de computar $K = (g)^{ab}\ mod\ p$, ya que Alice puede calcular $K = B^a\ mod\ p$ y Bob $K = A^b\ mod\ p$. Se utilizará $K$ como la clave compartida.\\
+\includegraphics[scale=0.4]{img/Diffie-Hellman.png}\\
+No obstante cualquier atacante que quiera conocer la clave $K$ en el canal solo tiene acceso a $g,p,A$ y $B$, por lo que para computar la clave tiene que calcular $a=log_p(A)$ y $b=log_p(B)$ siendo este el logaritmo discreto.\\
+Existen ataques a este protocolo que no están basados en resolver el logaritmo discreto sino en aprovechar que las partes no están autentificadas y por tanto hacer creer a ambos que él es el otro extremo, esto es conocido como \textit{Man-in-the-middle}.\\
+De la misma forma que se aplica este protocolo en su versión original es posible aplicarla sobre el grupo aditivo de las curvas elípticas, este protocolo es conocido como EC-DF y una de las ventajas que nos proporciona es que utilizando la compresión de punto se puede reducir la cantidad de información necesaria para realizar el protocolo con la misma seguridad, reduciendo el ancho de banda.
+
+
+\cleardoublepage
+\chapter{Esquemas de clave pública}
+Los esquemas de clave pública se basan en una pareja de claves (clave pública, clave privada), estas claves a diferencia de la criptografía simétrica requieren de su pareja para realizar la operación inversa.\\
+Existen dos usos fundamentales de este tipo de esquemas, el primero donde dos extremos quieren intercambiar información, el emisor usará la clave pública del receptor para cifrar el mensaje y enviarlo, el receptor al ser el único conocedor de su clave privada puede recuperar el mensaje original, el segundo caso donde, para demostrar la autenticidad de un emisor, éste cifra el mensaje con su clave privada y cualquier receptor comprueba la autenticidad del emisor cuando lo descifra con su clave pública, este caso es el que se conoce como \textit{firma digital}.
+\section{Funciones Hash}
+Hasta este punto hemos visto como se puede mantener la confidencialidad de un mensaje para que cualquier atacante no pueda obtener la información aún teniendo acceso al canal por el que se transmite, no obstante debemos tener en cuenta el escenario donde el atacante manipula el mensaje, por tanto debemos preocuparnos de la integridad, para comprobar que un mensaje no ha sido modificado es habitual hacer uso de \textit{funciones hash}.\\
+Una \textit{funcion hash} es una aplicación que lleva una cadena de bits de cualquier longitud a una cadena de bits de longitud fija. Estas funciones tienen una serie de propiedades deseables, si tenemos la función hash $h(x)=y$ ,sus propiedades deberían ser:
+\begin{itemize}
+\item Resistencia a la preimagen: debe ser difícil a efectos prácticos que conociendo $y$ se pueda calcular $x$.
+\item Resistencia a colisiones: debe ser difícil encontrar dos valores $x$ y $x'$ tal que $h(x)=h(x')$ pero $x\not=x'$.
+\item Resistencia a la segunda preimagen: dado un $x$ debe ser difícil encontrar otro $x'$ tal que $h(x)=h(x')$ pero $x\not=x'$.
+\end{itemize}
+Más adelante veremos como estas funciones son necesarias a la hora de comprobar la integridad de la información, ya que cualquier pequeña modificación en el mensaje se reflejaría al calcular el hash del mismo.
+
+\section{RSA}
+Supongamos dos usuarios finales Alice y Bob, Bob quiere enviar un mensaje a Alice y para ello se va a usar el algoritmo RSA, este consiste en:
+\begin{itemize}
+\item Alice elige dos números primos grandes $p$ y $q$ y calcula $N=p\cdot q$.
+\item Alice elige un exponente $e$ de forma que $mcd(e,(p-1)\cdot (q-1))=1$.
+\item En el calculo del exponente para desencriptar, Alice usa el algoritmo de Euclides extendido para conocer $d$ en la ecuación:
+\begin{equation}
+e\cdot d \equiv 1\ mod\ (p-1)(q-1)\label{eq:congruentes}
+\end{equation}
+\end{itemize}
+En este punto la clave pública de Alice es el par $(N,e)$ y su clave privada es la tripleta $(d,p,q)$. Por tanto para intercambiar el mensaje se realizan los siguientes pasos:
+\begin{itemize}
+\item Bob quiere mandar su mensaje $m$, por lo que cifra el mensaje para obtener $c$ calculando $c=m^e\ mod\ N$.
+\item Alice recibe $c$ por lo que para poder leer el mensaje tiene que calcular $m$ de la forma $m=c^d\ mod\ N$.
+\end{itemize}
+
+\underline{Demostración}: $m=c^d\ mod\ N$\\
+El orden del grupo $(\mathbb{Z}/N\mathbb{Z})^*$ viene dado por $\phi(N)=(q-1)(p-1)$, por tanto:
+\begin{equation}
+\forall x\in(\mathbb{Z}/N\mathbb{Z})^*: \ x^{(q-1)(p-1)}\equiv 1\ mod\ N\label{reducir}
+\end{equation}
+Ahora bien, para algún entero $s$ se tiene que $ed-s(q-1)(p-1)=1$ puesto que se cumple la ecuación \ref{eq:congruentes}. Por tanto:\\
+\[
+\begin{split}
+c^d&=m^{ed}\ mod\ N\\
+&=m^{1+s(q-1)(p-1)}\ mod\ N\\
+&=m\cdot m^{s(q-1)(p-1)}\ mod\ N\\
+&=m\ mod\ N
+\end{split}
+\]\\
+La seguridad de este algoritmo reside en el problema de factorización, ya que si logramos factorizar $N$ como $p\cdot q$ entonces podremos calcular $d$, no obstante este problema se considera complejo a nivel de cómputo.
+
+\section{Firma digital}
+La firma digital es un mecanismo que se usa para verificar el origen de un mensaje, es decir, asegura  la autenticación del emisor y el no repudio. Existen varias implementaciones diferentes de este mecanismo, pero en este caso nos vamos a centrar en la firma con RSA.\\
+Supongamos dos usuarios finales Alice y Bob, Alice quiere enviar un mensaje a Bob, pero Bob tiene que poder asegurarse que el mensaje procede de Alice y nadie lo ha modificado, para ello van a usar la firma digital, Alice firmaría el mensaje:
+\begin{itemize}
+\item Alice aplica una función hash $h$ al mensaje $m$, quedandose con $r=h(m)$.
+\item Alice usa su clave privada $(d,p,q)$ para cifrar $r$, esta será la firma del mensaje $S=m^d\ mod\ p\cdot q$.
+\item Alice envía el mensaje, que no tiene porque estar cifrado, junto con la firma a Bob.
+\end{itemize}
+Una vez firmado el mensaje Bob podrá verificar la firma de la siguiente forma:
+\begin{itemize}
+\item Bob recibe el mensaje y la firma de Alice y usa la firma para calcular $r_s=S^e\ mod\ N$ con la clave pública de Alice $(e,N)$.
+\item Bob aplica la misma función hash que Alice al mensaje $r_m=h(m)$.
+\item Si $r_s=r_m$ entonces el mensaje queda verificado.
+\end{itemize}
+Dado que Alice tuvo que usar su clave privada para cifrar la firma, no es posible modificar la firma $S$ sin que invalide la verificación, de la misma forma que ocurre en el mensaje ya que no podrías cifrar el nuevo hash.
+
+\cleardoublepage
+\chapter{Cifrado basado en identidad}
+El cifrado basado en identidad es un esquema de clave pública donde la clave de un usuario se obtiene a partir de una información que lo identifique, ya sea su email, número de teléfono, etc...\\
+Este esquema necesita de un generador de claves privadas (PKG), este provee a los usuarios de su clave privada y les da la forma de conocer la clave pública de los demás usuarios a partir de su identidad, el proceso que realiza un usuario final para conocer su clave privada y la clave pública de los demás solo se necesita aplicar una vez. \\
+Si dos usuarios finales quieren intercambiar un mensaje, por ejemplo Alice quiere enviar un mensaje a Bob, entonces Alice usa la clave pública maestra con la identidad de Bob para cifrar el mensaje y lo envía, luego Bob usará su clave privada para descifrar el mensaje.\\
+\includegraphics[scale=0.7]{img/Identity_Based_Encryption_Steps.png}\\
+
+\section{Emparejamiento}
+Dados dos grupos cíclicos aditivos $G_1, G_2$ de orden primo $p$ y un grupo cíclico $G_T$ escrito multiplicativamente, un \textit{emparejamiento} es una aplicación $e: G_1 \times G_2\ \rightarrow\ G_T$ que cumple:
+\begin{itemize}
+\item Bilinearidad:
+\[
+\forall a,b \in F^*_p, \forall P\in G_1, \forall Q\in G_2: e(aP,bQ)=e(P,Q)^{ab}
+\]
+\item No degenerado:
+\begin{equation*}
+\begin{split}
+&\forall P\in G_1\ P\not=0, \exists Q\in G_2\ t.q.\ e(P,Q)\not=1\\
+&\forall Q\in G_2\ Q\not=0, \exists P\in G_1\ t.q.\ e(P,Q)\not=1
+\end{split}
+\end{equation*}
+\item Computable: existe un algoritmo eficiente para computar $e$.
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% CONCLUSIONES %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\cleardoublepage
+\chapter{Conclusiones}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% APÉNDICE(S) %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% BIBLIOGRAFIA %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\cleardoublepage
+
+% Las siguientes dos instrucciones es todo lo que necesitas
+% para incluir las citas en la memoria
+\nocite{*}
+\bibliographystyle{abbrv}
+\bibliography{memoria} % memoria.bib es el nombre del fichero que contiene
+% las referencias bibliográficas. Abre ese fichero y mira el formato que tiene,
+% que se conoce como BibTeX. Hay muchos sitios que exportan referencias en
+% formato BibTeX. Prueba a buscar en http://scholar.google.com por referencias
+% y verás que lo puedes hacer de manera sencilla.
+% Más información: 
+% http://texblog.org/2014/04/22/using-google-scholar-to-download-bibtex-citations/
+
+
+
+
+\cleardoublepage
+\chapter{Anexo}
+
+\begin{verbatim}
+import numpy as np
+import math
+import matplotlib.pyplot as plt 
+# Siempre en la forma corta de Weierstrass
+class curva: 
+    a = -1
+    b = 1
+    #lista de diccionarios {nombre,x,signo,[color]}
+    puntos = []
+    def __init__(self,a,b):
+        self.a=a
+        self.b=b
+    def dibuja(self):
+        y, x = np.ogrid[-5:5:100j, -5:5:100j]
+        plt.contour(x.ravel(), y.ravel(), pow(y, 2) - pow(x, 3) - x * self.a - self.b, [0]) 
+        plt.grid()
+        
+    def figura(self):
+        plt.show()
+        
+    def limpiar_p(self):
+        self.puntos=[]
+    def add_p(self,punto):
+        self.puntos.append(punto)
+    def dibuja_p(self):
+        X=[punto['x'] for punto in self.puntos]
+        Y=[self.calcula_y(punto) for punto in self.puntos]
+        colors=[punto['color'] if 'color' in punto.keys() else 'purple' for punto in self.puntos]
+        plt.scatter(X,Y,c=colors,s=100)
+        
+    def calcula_y(self,punto):
+        return punto['signo']*math.sqrt(pow(punto['x'], 3) + punto['x'] * self.a + self.b)
+    
+    def suma_p(self,nombre1,nombre2):
+        A=next(item for item in self.puntos if item["nombre"] == nombre1)
+        B=next(item for item in self.puntos if item["nombre"] == nombre2)
+        A_x=A['x']
+        A_y=self.calcula_y(A)
+        B_x=B['x']
+        B_y=self.calcula_y(B)
+        if A_x != B_x:
+            lamda=(B_y-A_y)/(B_x-A_x)
+            mu=(A_y*B_x-B_y*A_x)/(B_x-A_x)
+        elif A_x == B_x and A_y != B_y:
+            lamda=(3*pow(A_x,2)+self.a)/(2*A_y)
+            mu=(-pow(A_x,3)+self.a*A_x+2*self.b)/(2*A_y)
+        else:
+            return {'nombre':'inf'}
+        P_x=pow(lamda,2)-A_x-B_x
+        P_y=-lamda*P_x-mu
+        punto = {'nombre':'%s + %s'%(nombre1,nombre2),'x':P_x, 'signo':1 if P_y>=0 else -1}
+        return punto
+    
+    #El primer punto debe tener menor x
+    def dibuja_suma_p(self,nombre1,nombre2):
+        A=next(item for item in self.puntos if item["nombre"] == nombre1)
+        B=next(item for item in self.puntos if item["nombre"] == nombre2)
+        suma=self.suma_p(nombre1,nombre2)
+        y_init=self.calcula_y(A) if min(A['x'],suma['x'])==A['x'] else -self.calcula_y(suma)
+        y_fin=self.calcula_y(B) if max(B['x'],suma['x'])==B['x'] else -self.calcula_y(suma)
+        plt.plot([min(A['x'],suma['x']),max(B['x'],suma['x'])], [y_init,y_fin], 'r-')
+        plt.axvline(x=suma['x'],c='purple')
+        
+    def guarda_plot(directorio="",nombre="Curva",extension="png"):
+        plt.savefig("%s%s.%s"%(directorio+"/"if directorio!="" else "",nombre,extension),dpi=400)
+\end{verbatim}
+
+
+
+\end{document}
