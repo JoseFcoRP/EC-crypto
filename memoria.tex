@@ -161,7 +161,7 @@ Es habitual agrupar los algoritmos según la cantidad de claves que son necesaria
 \cleardoublepage % empezamos en página impar
 \chapter{Herramientas matemáticas}
 \section{Grupo cíclico}
-Sea $G$ un grupo, se dice que $G$ es un \textit{grupo cíclico} si existe un elemento del grupo $g\in G$ de forma que $G=\left\langle g \right\rangle$, es decir, cualquier elemento del grupo puede expresarse como $g^n$ (o $ng$ si es un grupo aditivo) para algún $n\in\mathbb{N}$, denotamos entonces $g$ como \textit{generador} de $G$ y $\left\langle g \right\rangle$ como su base.
+Sea $G$ un grupo, se dice que $G$ es un \textit{grupo cíclico} si existe un elemento del grupo $g\in G$ de forma que $G=\left\langle g \right\rangle$, es decir, cualquier elemento del grupo puede expresarse como $g^n$ (o $ng$ si es un grupo aditivo) para algún $n\in\mathbb{N}$, llamamos entonces a $g$ \textit{generador} de $G$.
 Un ejemplo habitual de grupo cíclico es el grupo aditivo de los números enteros módulo $n$, denotado habitualmente como $\mathbb{Z}/n\mathbb{Z}$, tomando como generador el $1$.\\
 \underline{Lema}: Cada grupo cíclico finito de orden $n$ es isomorfo al grupo $\mathbb{Z}/n\mathbb{Z}$.
 
@@ -313,7 +313,7 @@ Con esta información ambos extremos son capaces de computar $K = (g)^{ab}\ mod\ 
 \includegraphics[scale=0.4]{img/Diffie-Hellman.png}\\
 No obstante cualquier atacante que quiera conocer la clave $K$ en el canal solo tiene acceso a $g,p,A$ y $B$, por lo que para computar la clave tiene que calcular $a=log_p(A)$ y $b=log_p(B)$ siendo este el logaritmo discreto.\\
 Existen ataques a este protocolo que no están basados en resolver el logaritmo discreto sino en aprovechar que las partes no están autentificadas y por tanto hacer creer a ambos que él es el otro extremo, esto es conocido como \textit{Man-in-the-middle}.\\
-De la misma forma que se aplica este protocolo en su versión original es posible aplicarla sobre el grupo aditivo de las curvas elípticas, este protocolo es conocido como EC-DF y una de las ventajas que nos proporciona es que utilizando la compresión de punto se puede reducir la cantidad de información necesaria para realizar el protocolo con la misma seguridad, reduciendo el ancho de banda.
+De la misma forma que se aplica este protocolo en su versión original es posible aplicarla sobre el grupo aditivo de las curvas elípticas, este protocolo es conocido como EC-DH y una de las ventajas que nos proporciona es que utilizando la compresión de punto se puede reducir la cantidad de información necesaria para realizar el protocolo con la misma seguridad, reduciendo el ancho de banda.
 
 
 \cleardoublepage
@@ -335,7 +335,7 @@ Supongamos dos usuarios finales Alice y Bob, Bob quiere enviar un mensaje a Alic
 \begin{itemize}
 \item Alice elige dos números primos grandes $p$ y $q$ y calcula $N=p\cdot q$.
 \item Alice elige un exponente $e$ de forma que $mcd(e,(p-1)\cdot (q-1))=1$.
-\item En el calculo del exponente para desencriptar, Alice usa el algoritmo de Euclides extendido para conocer $d$ en la ecuación:
+\item En el calculo del exponente para descifrar, Alice usa el algoritmo de Euclides extendido para conocer $d$ en la ecuación:
 \begin{equation}
 e\cdot d \equiv 1\ mod\ (p-1)(q-1)\label{eq:congruentes}
 \end{equation}
