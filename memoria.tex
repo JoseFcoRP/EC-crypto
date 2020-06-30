@@ -1,3 +1,4 @@
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Plantilla de memoria en LaTeX para la ETSIT - Universidad Rey Juan Carlos
 %%
@@ -35,6 +36,7 @@
 \usepackage{latexsym}  %% Logo LaTeX
 \usepackage{schemata}
 \usepackage{mathtools}
+\usepackage{listings}
 \title{Memoria del Proyecto}
 \author{Nombre del autor}
 
@@ -133,7 +135,14 @@ El objetivo de este trabajo es tener un primer contacto con el estudio de la cri
 
 \cleardoublepage
 \chapter{Introducción}
-La criptografía es la parte de la ciencia encargada de tratar la información de manera segura en presencia de adversarios, una de sus ramas es el cifrado de datos, que se encarga de poder intercambiar mensajes manteniendo la \textit{confidencialidad}. Para esto se hace uso de alguna transformación del mensaje de forma que no pueda ser recuperada ninguna información útil y que solo los receptores legítimos del mensaje puedan volver a transformarlo en el mensaje original, estas transformaciones son llamadas \textit{cifrado} y \textit{descifrado} respectivamente.\\
+La criptografía es el estudio y las técnicas para tratar la información de manera segura en presencia de adversarios. Esto se centra en cuatro puntos fundamentales para tratamiento de la información:
+\begin{itemize}
+\item Confidencialidad: La información está limitada a un grupo restringido que deben tener acceso a ella.
+\item Integridad: La información no puede modificada de manera no intencionada en ningún punto de su ciclo de vida.
+\item Autenticidad: El origen de la información debe ser contrastable.
+\item No repudio: El origen de la información no puede negar que la información fue originada por él.
+\end{itemize} 
+Dentro de este marco, vamos a centrarnos en el cifrado de datos. Para esto se hace uso de alguna transformación del mensaje de forma que no pueda ser recuperada ninguna información útil y que solo los receptores legítimos del mensaje puedan volver a transformarlo en el mensaje original, estas transformaciones son llamadas \textit{cifrado} y \textit{descifrado} respectivamente.\\
 Las primeras técnicas para cifrar mensajes consistían en sustituir todas las letras del mensaje mediante alguna tabla o relación, en concreto en el cifrado César se alternaban por su correspondiente en el alfabeto desplazada un número de posiciones, este número era la clave del cifrado y para descifrar bastaba con realizar el mismo desplazamiento en sentido inverso, dada la poca cantidad de claves posibles para este cifrado es muy fácil de romper por fuerza bruta, sin embargo una de las formas más ingeniosas para romperlo consiste en analizar la distribución de letras en el idioma del mensaje y, si este es suficientemente largo, se puede detectar el desplazamiento en esa distribución.\\
 \includegraphics[scale=0.4]{img/Caesar3.png}\\
 En el siglo XV aparece el cifrado Vigènere que consistía en una palabra clave que se usaba para desplazar las letras del mensaje, por ejemplo si la clave es 'ABC' los desplazamientos serían 1, 2 y 3 posiciones respectivamente, y se repetía esta clave hasta acabar por completo el mensaje.\\
@@ -160,6 +169,7 @@ Es habitual agrupar los algoritmos según la cantidad de claves que son necesaria
 
 \cleardoublepage % empezamos en página impar
 \chapter{Herramientas matemáticas}
+En este apartado se presentan una serie de conceptos y algoritmos necesarios para poder entender el origen de la seguridad de los diferentes esquemas, así como su implementación.
 \section{Grupo cíclico}
 Sea $G$ un grupo, se dice que $G$ es un \textit{grupo cíclico} si existe un elemento del grupo $g\in G$ de forma que $G=\left\langle g \right\rangle$, es decir, cualquier elemento del grupo puede expresarse como $g^n$ (o $ng$ si es un grupo aditivo) para algún $n\in\mathbb{N}$, llamamos entonces a $g$ \textit{generador} de $G$.
 Un ejemplo habitual de grupo cíclico es el grupo aditivo de los números enteros módulo $n$, denotado habitualmente como $\mathbb{Z}/n\mathbb{Z}$, tomando como generador el $1$.\\
@@ -201,7 +211,7 @@ Tras ello calcularemos los \textit{giant-step}, esto es:
 \[
 h_j=hg^{-j\ceil*{\sqrt{p}}}\ t.q.\ 0<j<\ceil*{\sqrt{p}}
 \]
-Una forma eficiente de almacenar estos resultados es con una tabla hash almacenando los pares $(g_i,i)$ y $(h_j,j)$ respectivamente.\\
+Una forma eficiente de almacenar estos resultados es con una tabla hash almacenando los pares $(i,g_i)$ y $(h_j,j)$ respectivamente.\\
 Ahora intentamos encontrar una coincidencia tal que $g_i=h_j$, si esto ocurre tenemos que:
 \[
 x_0=i, x_1=j
@@ -215,6 +225,7 @@ Dado que para calcular los \textit{baby-step} y los \textit{giant-step} son nece
 
 \cleardoublepage
 \chapter{Curvas elípticas} % título del capítulo (se muestra)
+En este capítulo se presenta la base de la criptografía sobre curvas elípticas, como hemos visto el problema en el que se va a basar la seguridad de los algoritmos es el logaritmo discreto, este requiere de un grupo cíclico, para ello vamos a utilizar el grupo formado por las curvas elípticas con su operación de suma de puntos que veremos a continuación.
 \label{chap:curvas-elipticas} % identificador del capítulo (no se muestra, es para poder referenciarlo)
 
 \section{Definiciones} % título de sección (se muestra)
@@ -230,7 +241,9 @@ Una \textit{curva elíptica} se define sobre el conjunto de soluciones de la ecua
 E:\ Y^2Z + a_1XYZ + a_3YZ^2 = X^3 + a_2X^2Z + a_4XZ^2 + a_6Z^3 \label{eq:proy-eliptic}
 \end{equation}
 donde $a_1,a_2,a_3,a_4,a_6\in K$, esta notación es conocida como forma larga Weierstrass. Dicha curva debe ser no singular, es decir, si la escribimos de la forma $F(X,Y,Z)=0$, las derivadas parciales no deben ser cero simultáneamente en ningún punto de la curva.
-El conjunto de los \textit{puntos K-racionales} en $E$ son la solución de la ecuación \ref{eq:proy-eliptic} y lo denotaremos $E(K)$. Destacar que la curva tiene exactamente un punto racional con coordenada $Z$ igual a cero, el $(0,1,0)$, este es el punto en el infinito y lo denotaremos como $\cal{O}$.
+El conjunto de los \textit{puntos K-racionales} en $E$ son la solución de la ecuación \ref{eq:proy-eliptic} y lo denotaremos $E(K)$. Destacar que la curva tiene exactamente un punto racional con coordenada $Z$ igual a cero, el $(0,1,0)$, este es el punto en el infinito y lo denotaremos como $\cal{O}$.\\
+\underline{Nota:}\\
+Esta representación de la curva permite realizar operaciones de forma eficiente, esto puede verse en \cite[pag. 31-32]{Nigel}.
 \section{Paso al plano afín}
 Si tomamos la ecuación \ref{eq:proy-eliptic} y definimos el cambio de forma que:
 \begin{itemize}
@@ -298,10 +311,21 @@ Donde $t$ se conoce como la traza de Frobenius.\\
 La aplicación $q^{th}$-potencia de Frobenius de la curva $E$ definida sobre $\mathbb{F}_q$ es:\\
 \schema{\schemabox{$\varphi$}}{\schemabox{$E(\overline{\mathbb{F}_q})\rightarrow E(\overline{\mathbb{F}_q})$\\$(x,y)\rightarrow (x^q,y^q)$\\$\cal{O}\rightarrow \cal{O}$}}\\
 Esta aplicación es un endomorfismo que respeta la operación de la ley de grupo $\varphi (P+Q)=\varphi (P)+\varphi (Q)$\\
+\section{Compresión de punto}
+Para transmitir la información de un punto en una curva elíptica en el plano afín se podría enviar las coordenadas $x$ e $y$ del punto, pero esto puede mejorarse si nos damos cuenta que para cada coordenada $x$ solo hay dos posibles valores en la curva de la coordenada $y$, por lo que solo es necesario indicar cual debemos tomar, reduciendo nuestra representación a la mitad más un bit del tamaño original.\\
+\underline{Demostración}:\\
+Para una curva elíptica sobre un cuerpo finito $\mathbb{F}^*_p$ con $p$ un número primo grande, tomamos $\alpha \in \mathbb{F}^*_p$.\\
+Ahora bien, siendo $\pm \beta$ las raíces cuadradas de $\alpha$, estas tienen distinta paridad, ya que $-\beta = p - \beta$. Por tanto podemos reconstruir cualquier punto de la curva indicando con un bit $b$ la paridad de $y$.\\
+Computamos $\beta = \sqrt{x^3+ax+b}$  $(mod\ p)$. Si la paridad de $\beta$ y $b$ coinciden asignamos $y = \beta$, en caso contrario asignamos $y = p-\beta$. Si $\beta = 0$ asignamos $y=0$ sin importar $b$.
+
 
 
 \cleardoublepage
-\chapter{Intercambio de claves}
+\chapter{Clave pública}
+Los esquemas de clave pública se basan en una pareja de claves (clave pública, clave privada), estas claves a diferencia de la criptografía simétrica requieren de su pareja para realizar la operación inversa.\\
+Existen dos usos fundamentales de este tipo de esquemas, el primero donde dos extremos quieren intercambiar información, el emisor usará la clave pública del receptor para cifrar el mensaje y enviarlo, el receptor al ser el único conocedor de su clave privada puede recuperar el mensaje original, el segundo caso donde, para demostrar la autenticidad de un emisor, éste cifra el mensaje con su clave privada y cualquier receptor comprueba la autenticidad del emisor cuando lo descifra con su clave pública, este caso es el que se conoce como \textit{firma digital}.
+
+\section{Intercambio de claves Diffie-Hellman}
 En algunos algoritmos es necesario que partes no autentificadas lleguen a intercambiar claves por un canal no seguro, esto supuso un problema que solventaron Whitfield Diffie y Martin Hellman con su protocolo, se utiliza para acordar claves simétricas en una sesión y esto posteriormente permite los protocolos de comunicación autentificada. Su seguridad tiene origen en el problema del logaritmo discreto ya que, como hemos visto antes en el capítulo\ref{chap:logaritmo discreto}, es fácil de computar y difícil de invertir.\\
 Supongamos que tenemos dos usuarios finales que quieren comunicarse entre sí, sean estos Alice y Bob, el protocolo Difie-Hellman en una versión simple sigue los siguientes pasos:
 \begin{itemize}
@@ -313,13 +337,8 @@ Con esta información ambos extremos son capaces de computar $K = (g)^{ab}\ mod\ 
 \includegraphics[scale=0.4]{img/Diffie-Hellman.png}\\
 No obstante cualquier atacante que quiera conocer la clave $K$ en el canal solo tiene acceso a $g,p,A$ y $B$, por lo que para computar la clave tiene que calcular $a=log_p(A)$ y $b=log_p(B)$ siendo este el logaritmo discreto.\\
 Existen ataques a este protocolo que no están basados en resolver el logaritmo discreto sino en aprovechar que las partes no están autentificadas y por tanto hacer creer a ambos que él es el otro extremo, esto es conocido como \textit{Man-in-the-middle}.\\
-De la misma forma que se aplica este protocolo en su versión original es posible aplicarla sobre el grupo aditivo de las curvas elípticas, este protocolo es conocido como EC-DH y una de las ventajas que nos proporciona es que utilizando la compresión de punto se puede reducir la cantidad de información necesaria para realizar el protocolo con la misma seguridad, reduciendo el ancho de banda.
+De la misma forma que se aplica este protocolo en su versión original es posible aplicarla sobre el grupo aditivo de las curvas elípticas, este protocolo es conocido como EC-DH y una de las ventajas que nos proporciona es que utilizando la compresión de punto se puede reducir la cantidad de información necesaria para realizar el protocolo con la misma seguridad, reduciendo el ancho de banda y mejorando el rendimiento. Curve25519 es una curva elíptica conocida por ofrecer buen rendimiento.
 
-
-\cleardoublepage
-\chapter{Esquemas de clave pública}
-Los esquemas de clave pública se basan en una pareja de claves (clave pública, clave privada), estas claves a diferencia de la criptografía simétrica requieren de su pareja para realizar la operación inversa.\\
-Existen dos usos fundamentales de este tipo de esquemas, el primero donde dos extremos quieren intercambiar información, el emisor usará la clave pública del receptor para cifrar el mensaje y enviarlo, el receptor al ser el único conocedor de su clave privada puede recuperar el mensaje original, el segundo caso donde, para demostrar la autenticidad de un emisor, éste cifra el mensaje con su clave privada y cualquier receptor comprueba la autenticidad del emisor cuando lo descifra con su clave pública, este caso es el que se conoce como \textit{firma digital}.
 \section{Funciones Hash}
 Hasta este punto hemos visto como se puede mantener la confidencialidad de un mensaje para que cualquier atacante no pueda obtener la información aún teniendo acceso al canal por el que se transmite, no obstante debemos tener en cuenta el escenario donde el atacante manipula el mensaje, por tanto debemos preocuparnos de la integridad, para comprobar que un mensaje no ha sido modificado es habitual hacer uso de \textit{funciones hash}.\\
 Una \textit{funcion hash} es una aplicación que lleva una cadena de bits de cualquier longitud a una cadena de bits de longitud fija. Estas funciones tienen una serie de propiedades deseables, si tenemos la función hash $h(x)=y$ ,sus propiedades deberían ser:
@@ -330,8 +349,12 @@ Una \textit{funcion hash} es una aplicación que lleva una cadena de bits de cual
 \end{itemize}
 Más adelante veremos como estas funciones son necesarias a la hora de comprobar la integridad de la información, ya que cualquier pequeña modificación en el mensaje se reflejaría al calcular el hash del mismo.
 
-\section{RSA}
-Supongamos dos usuarios finales Alice y Bob, Bob quiere enviar un mensaje a Alice y para ello se va a usar el algoritmo RSA, este consiste en:
+\section{Ejemplo: RSA}
+Como ejemplo de esquema de clave pública vamos a analizar RSA, nombrado así por sus creadores Rivest, Shamir y Adleman, originado en 1979 es uno de los algoritmos más usados tanto para cifrar como para firmar digitalmente.\\
+
+\subsection{Cifrado}
+En primer lugar analicemos en que consiste el algoritmo aplicado al cifrado de mensajes entre extremos.\\
+Supongamos dos usuarios finales Alice y Bob. Bob quiere enviar un mensaje a Alice y para ello se va a usar el algoritmo RSA, este consiste en:
 \begin{itemize}
 \item Alice elige dos números primos grandes $p$ y $q$ y calcula $N=p\cdot q$.
 \item Alice elige un exponente $e$ de forma que $mcd(e,(p-1)\cdot (q-1))=1$.
@@ -362,12 +385,12 @@ c^d&=m^{ed}\ mod\ N\\
 \]\\
 La seguridad de este algoritmo reside en el problema de factorización, ya que si logramos factorizar $N$ como $p\cdot q$ entonces podremos calcular $d$, no obstante este problema se considera complejo a nivel de cómputo.
 
-\section{Firma digital}
+\subsection{Firma digital}
 La firma digital es un mecanismo que se usa para verificar el origen de un mensaje, es decir, asegura  la autenticación del emisor y el no repudio. Existen varias implementaciones diferentes de este mecanismo, pero en este caso nos vamos a centrar en la firma con RSA.\\
 Supongamos dos usuarios finales Alice y Bob, Alice quiere enviar un mensaje a Bob, pero Bob tiene que poder asegurarse que el mensaje procede de Alice y nadie lo ha modificado, para ello van a usar la firma digital, Alice firmaría el mensaje:
 \begin{itemize}
-\item Alice aplica una función hash $h$ al mensaje $m$, quedandose con $r=h(m)$.
-\item Alice usa su clave privada $(d,p,q)$ para cifrar $r$, esta será la firma del mensaje $S=m^d\ mod\ p\cdot q$.
+\item Alice aplica una función hash $h$ al mensaje $m$, quedandose con $r_s=h(m)$.
+\item Alice usa su clave privada $(d,p,q)$ para cifrar $r_s$, esta será la firma del mensaje $S=r_s^d\ mod\ p\cdot q$.
 \item Alice envía el mensaje, que no tiene porque estar cifrado, junto con la firma a Bob.
 \end{itemize}
 Una vez firmado el mensaje Bob podrá verificar la firma de la siguiente forma:
@@ -382,7 +405,7 @@ Dado que Alice tuvo que usar su clave privada para cifrar la firma, no es posibl
 \chapter{Cifrado basado en identidad}
 El cifrado basado en identidad es un esquema de clave pública donde la clave de un usuario se obtiene a partir de una información que lo identifique, ya sea su email, número de teléfono, etc...\\
 Este esquema necesita de un generador de claves privadas (PKG), este provee a los usuarios de su clave privada y les da la forma de conocer la clave pública de los demás usuarios a partir de su identidad, el proceso que realiza un usuario final para conocer su clave privada y la clave pública de los demás solo se necesita aplicar una vez. \\
-Si dos usuarios finales quieren intercambiar un mensaje, por ejemplo Alice quiere enviar un mensaje a Bob, entonces Alice usa la clave pública maestra con la identidad de Bob para cifrar el mensaje y lo envía, luego Bob usará su clave privada para descifrar el mensaje.\\
+Si dos usuarios finales quieren intercambiar un mensaje, por ejemplo Alice quiere enviar un mensaje a Bob, entonces Alice usa la clave pública maestra con la identidad de Bob para cifrar el mensaje y lo envía, luego Bob usará su clave privada para descifrar el mensaje, como queda representado en el siguiente diagrama.\\
 \includegraphics[scale=0.7]{img/Identity_Based_Encryption_Steps.png}\\
 
 \section{Emparejamiento}
@@ -402,6 +425,68 @@ Dados dos grupos cíclicos aditivos $G_1, G_2$ de orden primo $p$ y un grupo cícl
 \item Computable: existe un algoritmo eficiente para computar $e$.
 \end{itemize}
 
+\section{Esquema basado en emparejamiento}
+En este punto tenemos los conceptos necesarios para plantear el esquema propuesto en el artículo original de Dan Boneh y Matthew Franklin sobre cifrado basado en identidad usando Weil pairing \cite{Boneh}.\\
+\subsection{Preparación}
+Para poder tener los elementos necesarios del cifrado basado en identidad, necesitamos un paso previo de selección de parámetros para el algoritmo.
+Sea $\cal{G}$ un generador de parámetros para el problema Diffie-Hellman Bilineal \cite[pag. 7-9]{Boneh}.\\
+Dado un parámetro de seguridad $k \in \mathbb{Z}^+$, se realizan los siguientes pasos:\\
+
+\begin{itemize}
+\item Paso 1: Ejecutar $\cal{G}$ con el parámetro $k$ para obtener un primo $q$, dos grupos $G_1$ y $G_2$ de orden $q$ y un emparejamiento válido $e: G_1 \times G_1\ \rightarrow\ G_2$. Elegir al azar un generador $P \in G_1$.\\
+\underline{Nota}: $G_1$ es elegido como un subgrupo de $E(\mathbb{F}_p)$, en concreto el subgrupo generado por $P\in E(\mathbb{F}_p)$ de orden $q$. Por otro lado $G_2$ es el subgrupo de $\mathbb{F}^*_{p^2}$ de orden $q$.
+
+\item Paso 2: Elegir al azar $s \in \mathbb{Z}^*_q$ y tomar $P_{pub} = sP$. La clave maestra será $s$.
+\item Paso 3: Elegir las funciones criptográficas:
+\[
+\begin{split}
+&H_1: \lbrace 0,1\rbrace^*\ \rightarrow\ G^*_1\\
+&H_2: G^*_2\ \rightarrow\  \lbrace 0,1\rbrace^n
+\end{split}
+\]
+\end{itemize}
+El espacio de mensajes es $\cal{M} =$ $\lbrace 0,1 \rbrace^n$, el espacio de texto cifrado es $\cal{C} =$ $G_1^* \times \lbrace 0,1 \rbrace^n$.\\
+Los parámetros para el sistema son $\langle q,G_1,G_2,e,n,P,P_{pub},H_1,H_2\rangle$, junto con la clave maestra $s$.
+\subsection{Obtención de clave privada}
+Cuando un usuario del sistema quiere solicitar su clave privada, se realiza el siguiente computo.\\
+Dada su $ID \in \lbrace 0,1 \rbrace^*$ calculamos $Q_{ID}=H_1(ID)\in G^*_1$ y tomamos $d_{ID}$ como la clave privada de la forma $d_{ID} = sQ_{ID}$.
+
+\subsection{Cifrado}
+Sea el mensaje $M\in \cal{M}$, para poder cifrarlo en primer lugar se calcula la clave pública del destinatario, para ello se computa $Q_{ID}=H_1(ID)\in G^*_1$, se elige al azar $r\in \mathbb{Z}^*_q$, el texto cifrado sería:\\
+\[
+C = \langle rP, M \oplus H_2(g^r_{ID})\rangle
+\]
+donde $ g^r_{ID} = e(Q_{ID}, P_{pub}) \in G_2$
+
+\subsection{Descifrado}
+Sea el mensaje cifrado $C = \langle U,V \rangle \in \cal{C}$ que ha sido computado con la clave pública usando la identidad $ID$. Para descifrar el mensaje usando la clave privada $d_{ID}\in G^*_1$ y obtener el mensaje original $M$ tenemos que computar:
+\[
+M = V \oplus H_2(e(d_{ID}, U))
+\]
+
+
+\underline{Demostración}: $M = V \oplus H_2(e(d_{ID}, U))$\\
+Para demostrar que el mecanismo de cifrar y descifrar efectivamente es correcto, hay que probar que el mensaje original puede obtenerse descifrando el mensaje cifrado. Para ello se debe usar la propiedad de bilinearidad del emparejamiento.
+\[
+\begin{split}
+V \oplus H_2(e(d_{ID}, U)) &= V \oplus H_2(e(sQ_{ID}, rP))\\
+&= V \oplus H_2(e(Q_{ID}, P)^{rs})\\
+&= V \oplus H_2(e(Q_{ID}, sP)^r)\\
+&= V \oplus H_2(e(Q_{ID}, P_{pub})^r)\\
+&= V \oplus H_2(g^r_{ID})\\
+&= M \oplus H_2(g^r_{ID}) \oplus H_2(g^r_{ID})\\
+&= M
+\end{split}
+\]\\
+
+\section{Consideraciones sobre el esquema}
+\begin{itemize}
+\item La clave maestra es un punto crítico del sistema, ya que si alguien es capaz de conseguirla podrá obtener todas las claves privadas de los usuarios del sistema.
+\item Si se rompe una clave privada se podrían descifrar todos los mensajes anteriores cifrados con la clave publica correspondiente.
+\item Para una clave privada comprometida es imposible generar una nueva asociada a esa ID.
+\item Si se conoce desde el principio el número de participantes del sistema se puede eliminar el generador de claves privadas (PKG) una vez todos los usuarios conozcan la suya, eliminando unos de los posibles puntos de ataque.
+\
+\end{itemize}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % CONCLUSIONES %
@@ -409,6 +494,8 @@ Dados dos grupos cíclicos aditivos $G_1, G_2$ de orden primo $p$ y un grupo cícl
 
 \cleardoublepage
 \chapter{Conclusiones}
+En la actualidad los mecanismos criptográficos se basan en dos problemas fundamentalmente, el logaritmo discreto que se ha tratado en este estudio y el problema de la factorización de números enteros. Aunque se consideren problemas difíciles en tiempo de cómputo y haya planteado el algoritmo Baby-step/Giant-step de complejidad $\cal{O} $($\sqrt{p}$), esto no significa que no haya algoritmos mejores y que puedan comprometer en un futuro la seguridad de los sistemas basados en estos dos problemas. De hecho existen algoritmos en el paradigma de la computación cuántica capaces de resolver estos problemas con una menor complejidad como el algoritmo de Shor.\\
+La seguridad de los sistemas una vez se implementan crean puntos de ataque que no están contemplados originalmente en el algoritmo, ya sea por la elección de los números primos, ataques de canal lateral o por las funciones hash elegidas. Por lo que un esquema que de forma teórica tiene buenos mecanismos de seguridad puede ser vulnerable cuando se lleva a la practica.
 
 
 
@@ -458,7 +545,8 @@ class curva:
         self.b=b
     def dibuja(self):
         y, x = np.ogrid[-5:5:100j, -5:5:100j]
-        plt.contour(x.ravel(), y.ravel(), pow(y, 2) - pow(x, 3) - x * self.a - self.b, [0]) 
+        plt.contour(x.ravel(), y.ravel(), pow(y, 2) - pow(x, 3)\
+        						 - x * self.a - self.b, [0]) 
         plt.grid()
         
     def figura(self):
@@ -471,15 +559,19 @@ class curva:
     def dibuja_p(self):
         X=[punto['x'] for punto in self.puntos]
         Y=[self.calcula_y(punto) for punto in self.puntos]
-        colors=[punto['color'] if 'color' in punto.keys() else 'purple' for punto in self.puntos]
+        colors=[punto['color'] if 'color' in punto.keys()\
+        				 else 'purple' for punto in self.puntos]
         plt.scatter(X,Y,c=colors,s=100)
         
     def calcula_y(self,punto):
-        return punto['signo']*math.sqrt(pow(punto['x'], 3) + punto['x'] * self.a + self.b)
+        return punto['signo']*math.sqrt(pow(punto['x'], 3)\
+        				 + punto['x'] * self.a + self.b)
     
     def suma_p(self,nombre1,nombre2):
-        A=next(item for item in self.puntos if item["nombre"] == nombre1)
-        B=next(item for item in self.puntos if item["nombre"] == nombre2)
+        A=next(item for item in self.puntos\
+        		 if item["nombre"] == nombre1)
+        B=next(item for item in self.puntos\
+        		 if item["nombre"] == nombre2)
         A_x=A['x']
         A_y=self.calcula_y(A)
         B_x=B['x']
@@ -494,21 +586,28 @@ class curva:
             return {'nombre':'inf'}
         P_x=pow(lamda,2)-A_x-B_x
         P_y=-lamda*P_x-mu
-        punto = {'nombre':'%s + %s'%(nombre1,nombre2),'x':P_x, 'signo':1 if P_y>=0 else -1}
+        punto = {'nombre':'%s + %s'%(nombre1,nombre2),'x':P_x,\
+        		 'signo':1 if P_y>=0 else -1}
         return punto
     
     #El primer punto debe tener menor x
     def dibuja_suma_p(self,nombre1,nombre2):
-        A=next(item for item in self.puntos if item["nombre"] == nombre1)
-        B=next(item for item in self.puntos if item["nombre"] == nombre2)
+        A=next(item for item in self.puntos\
+        		 if item["nombre"] == nombre1)
+        B=next(item for item in self.puntos\
+        		 if item["nombre"] == nombre2)
         suma=self.suma_p(nombre1,nombre2)
-        y_init=self.calcula_y(A) if min(A['x'],suma['x'])==A['x'] else -self.calcula_y(suma)
-        y_fin=self.calcula_y(B) if max(B['x'],suma['x'])==B['x'] else -self.calcula_y(suma)
-        plt.plot([min(A['x'],suma['x']),max(B['x'],suma['x'])], [y_init,y_fin], 'r-')
+        y_init=self.calcula_y(A) if min(A['x'],suma['x'])==A['x']\
+        						 else -self.calcula_y(suma)
+        y_fin=self.calcula_y(B) if max(B['x'],suma['x'])==B['x']\
+        						else -self.calcula_y(suma)
+        plt.plot([min(A['x'],suma['x']),\
+        			max(B['x'],suma['x'])], [y_init,y_fin], 'r-')
         plt.axvline(x=suma['x'],c='purple')
         
     def guarda_plot(directorio="",nombre="Curva",extension="png"):
-        plt.savefig("%s%s.%s"%(directorio+"/"if directorio!="" else "",nombre,extension),dpi=400)
+        plt.savefig("%s%s.%s"%(directorio+"/"if directorio!=""\
+        					 else "",nombre,extension),dpi=400)
 \end{verbatim}
 
 
