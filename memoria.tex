@@ -74,7 +74,7 @@ DOBLE GRADO INGENIERÍA DEL SOFTWARE Y MATEMÁTICAS
 \vspace{0.4cm}
 
 \large
-Curso Académico 2018/2019
+Curso Académico 2019/2020
 
 \vspace{0.8cm}
 
@@ -135,23 +135,26 @@ El objetivo de este trabajo es tener un primer contacto con el estudio de la cri
 
 \cleardoublepage
 \chapter{Introducción}
-La criptografía es el estudio y las técnicas para tratar la información de manera segura en presencia de adversarios. Esto se centra en cuatro puntos fundamentales para tratamiento de la información:
+La criptografía es el estudio y las técnicas para tratar la información de manera segura en presencia de adversarios. Para conseguir ese objetivo podemos tener en cuenta cuatro puntos fundamentales para tratamiento de la información:
 \begin{itemize}
-\item Confidencialidad: La información está limitada a un grupo restringido que deben tener acceso a ella.
-\item Integridad: La información no puede modificada de manera no intencionada en ningún punto de su ciclo de vida.
+\item Confidencialidad: La información no puede ser accedida por miembros externos al grupo destinado a tratar la información.
+\item Integridad: La información no puede ser modificada en ningún punto de su ciclo de vida.
 \item Autenticidad: El origen de la información debe ser contrastable.
 \item No repudio: El origen de la información no puede negar que la información fue originada por él.
 \end{itemize} 
 Dentro de este marco, vamos a centrarnos en el cifrado de datos. Para esto se hace uso de alguna transformación del mensaje de forma que no pueda ser recuperada ninguna información útil y que solo los receptores legítimos del mensaje puedan volver a transformarlo en el mensaje original, estas transformaciones son llamadas \textit{cifrado} y \textit{descifrado} respectivamente.\\
 Las primeras técnicas para cifrar mensajes consistían en sustituir todas las letras del mensaje mediante alguna tabla o relación, en concreto en el cifrado César se alternaban por su correspondiente en el alfabeto desplazada un número de posiciones, este número era la clave del cifrado y para descifrar bastaba con realizar el mismo desplazamiento en sentido inverso, dada la poca cantidad de claves posibles para este cifrado es muy fácil de romper por fuerza bruta, sin embargo una de las formas más ingeniosas para romperlo consiste en analizar la distribución de letras en el idioma del mensaje y, si este es suficientemente largo, se puede detectar el desplazamiento en esa distribución.\\
+\begin{figure}[H]
 \includegraphics[scale=0.4]{img/Caesar3.png}\\
+\caption{Cifrado César}
+\end{figure}
 En el siglo XV aparece el cifrado Vigènere que consistía en una palabra clave que se usaba para desplazar las letras del mensaje, por ejemplo si la clave es 'ABC' los desplazamientos serían 1, 2 y 3 posiciones respectivamente, y se repetía esta clave hasta acabar por completo el mensaje.\\
-La criptografía estuvo ligada fuertemente al uso militar y durante los siglos XIX y XX tuvo una importancia fundamental con la maquina Enigma, en este periodo de tiempo se invirtió un gran esfuerzo en desarrollar este área dando lugar a grandes avances.\\
-Posteriormente a la Segunda Guerra Mundial se realizaron muchos estudios teóricos y en los años 70 se crearon algunos estándares de algoritmos de cifrado, con la evolución de la informática desde entonces existe una actualización constante de algoritmos cada vez mas seguros ya que la capacidad de cómputo es mayor.\\
-Es habitual agrupar los algoritmos según la cantidad de claves que son necesarias al cifrar y descifrar:
+La criptografía estuvo ligada fuertemente al uso militar y durante los siglos XIX y XX tuvo una importancia fundamental con la máquina Enigma, en este periodo de tiempo se invirtió un gran esfuerzo en desarrollar este área dando lugar a grandes avances.\\
+Posteriormente a la Segunda Guerra Mundial se realizaron muchos estudios teóricos y en los años 70 se crearon algunos estándares de algoritmos de cifrado, a partir de entonces, con la evolución de la informática existe una actualización constante de algoritmos cada vez mas seguros ya que la capacidad de cómputo es mayor.\\
+Es habitual agrupar los algoritmos según la naturaleza de las claves que son necesarias al cifrar y descifrar:
 \begin{itemize}
 \item Criptografía simétrica: Estos métodos utilizan la misma clave para cifrar y descifrar mensajes, las distintas partes que intercambian información deben conocer esta clave de antemano, existen distintos algoritmos que ponen esto en practica, uno de los mas conocidos entre los métodos recientes es DES (Data Encryption Standard), diseñado en los años 70 y reemplazado a día de hoy por AES (Advanced Encryption Standard).
-\item Ciptografía asimétrica: También conocida como criptografía de clave pública, se basa en un par de claves, una pública que se debe dejar a disposición de cualquiera y una privada que se debe mantener en secreto. Este tipo de métodos son utilizados para el cifrado basado en identidad y el cifrado basado en certificados.
+\item Ciptografía asimétrica: También conocida como criptografía de clave pública, se basa en un par de claves, una pública que se debe dejar a disposición de cualquiera y una privada que se debe mantener en secreto. Este tipo de métodos son utilizados, entre otras cosas, para el cifrado basado en identidad y el cifrado basado en certificados.
 \end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -170,31 +173,43 @@ Es habitual agrupar los algoritmos según la cantidad de claves que son necesaria
 \cleardoublepage % empezamos en página impar
 \chapter{Herramientas matemáticas}
 En este apartado se presentan una serie de conceptos y algoritmos necesarios para poder entender el origen de la seguridad de los diferentes esquemas, así como su implementación.
+\section{Grupo}
+Dado un conjunto no vacío de elementos $G$ y una operación $\cdot$ que combina un par de elementos en un tercero, se define grupo al par ($G$,$\cdot$) donde se cumplen las siguientes propiedades:
+\begin{itemize}
+\item Clausura: $\forall a,b \in G$ se tiene que $a\cdot b\in G$ .
+\item Asociatividad: $\forall a,b,c \in G$ se tiene que $a\cdot(b\cdot c) =(a\cdot b)\cdot c$ .
+\item Elemento neutro: $\exists e\in G$ tal que $\forall a\in G$ se cumple $a\cdot e =e\cdot a = a$ . Cuando la operación es la multiplicación se denota este elemento como $1$ y cuando es la suma se denota como $0$.
+\item Elemento inverso: $\forall a\in G,\ \exists a^{-1}\in G$ elemento inverso de $a$ tal que $a \cdot a^{-1}=e$ . Cuando la operación es la suma $+$ se suele denotar al elemento inverso como $-a$ .
+\end{itemize}
+Se denomina grupo abeliano si además de esto se cumple la propiedad conmutativa:\\
+$\forall a,b\in G$ se cumple que $a\cdot b = b\cdot a$ .\\
+Es habitual que los grupos abelianos usen notación aditiva $+$.
+
 \section{Grupo cíclico}
-Sea $G$ un grupo, se dice que $G$ es un \textit{grupo cíclico} si existe un elemento del grupo $g\in G$ de forma que $G=\left\langle g \right\rangle$, es decir, cualquier elemento del grupo puede expresarse como $g^n$ (o $ng$ si es un grupo aditivo) para algún $n\in\mathbb{N}$, llamamos entonces a $g$ \textit{generador} de $G$.
+Sea $G$ un grupo, se dice que $G$ es un \textit{grupo cíclico} si existe un elemento del grupo $g\in G$ de forma que $G=\left\langle g \right\rangle$, es decir, cualquier elemento del grupo puede expresarse como $g^n$ (o $ng$ si es un grupo aditivo) para algún $n\in\mathbb{Z}$, llamamos entonces a $g$ \textit{generador} de $G$.
 Un ejemplo habitual de grupo cíclico es el grupo aditivo de los números enteros módulo $n$, denotado habitualmente como $\mathbb{Z}/n\mathbb{Z}$, tomando como generador el $1$.\\
 \underline{Lema}: Cada grupo cíclico finito de orden $n$ es isomorfo al grupo $\mathbb{Z}/n\mathbb{Z}$.
 
 \section{Logaritmo discreto}
 \label{chap:logaritmo discreto}
-Para algunos algoritmos de critografía necesitamos una función que sea fácil de aplicar pero difícil de invertir a nivel de tiempo de cómputo, por ello vamos a ver el caso del logaritmo discreto.\\
-Dado un grupo cíclico finito $G$ con base $\left\langle g \right\rangle$, tenemos que:
+Para algunos algoritmos de criptografía necesitamos una función que sea fácil de aplicar pero difícil de invertir a nivel de tiempo de cómputo, por ello vamos a ver el caso del logaritmo discreto.\\
+Dado un grupo cíclico finito $G$ con base $g$, definimos el logaritmo discreto como:
 \[
 y=g^x \Longleftrightarrow x =\log_{g}(y)
 \]
-Por un lado tenemos la \textit{exponenciación discreta}, es decir, $g^x$ cuando $x$ es conocido, esta operación se puede calcular con el algoritmo recursivo de exponenciación binaria, con complejidad $\cal{O} $($\log n$).\\
+Por un lado tenemos la \textit{exponenciación discreta}, es decir, $g^x$ cuando $x$ es conocido, esta operación se puede calcular con el algoritmo recursivo de exponenciación binaria, con complejidad $\cal{O} $($\log x$).\\
 No obstante el problema de calcular $x =\log_{g}(y)$ es más difícil, el algoritmo Baby-step/Giant-step tiene complejidad $\cal{O} $($\sqrt{p}$), asumiendo que el grupo tiene orden primo $p$.
 \section{Exponenciación binaria}
 Para calcular $g^x$, tenemos que hacer la operación recursiva $F$ definida de la siguiente forma:\\
-\schema{\schemabox{$F(x^n)= $}}{
+\schema{\schemabox{$F(g^x)= $}}{
 \schemabox{
-$x$ si $n=1$\\
-$\left( F(x^\frac{n}{2}) \right)^2$ si $n$ es par\\
-$F(x^{(n-1)})\cdot x$ si $n$ es impar
+$g$ si $n=1$\\
+$\left( F(g^\frac{x}{2}) \right)^2$ si $x$ es par\\
+$F(g^{(x-1)})\cdot g$ si $x$ es impar
 }
 }\\
-Puesto que en cada operación reducimos el exponente $n$ a la mitad, tenemos que realizar 
-$\ceil{\log_{2}(n)}$ operaciones, por tanto este problema se puede resolver en $\cal{O} $($\log n$).\\
+Puesto que en cada operación reducimos el exponente $x$ a la mitad, tenemos que realizar 
+$\ceil{\log_{2}(x)}$ operaciones, por tanto este problema se puede resolver en $\cal{O} $($\log x$).\\
 
 \section{Algoritmo Baby-step/Giant-step}
 Queremos conocer $x$ en la ecuación $h=g^x$, sea $p$ el orden del grupo $G$.\\
@@ -233,8 +248,12 @@ En este capítulo se presenta la base de la criptografía sobre curvas elípticas, 
 \subsection{Plano proyectivo}
 Sea $K$ un cuerpo, \textit{el plano proyectivo} $\mathbb{P}^2(K)$ definido sobre $K$ son la tripletas:
 \[(X,Y,Z)\ t.q.\ X,Y,Z\in K\]
-Donde $X,Y,Z$ no son simultáneamente 0 y definimos la relación de equivalencia:
-\[(X,Y,Z)\equiv(X',Y'.Z') \Longleftrightarrow \exists \lambda \in K\ t.q.\ X=\lambda X',\ Y=\lambda Y',\ Z=\lambda Z' \]
+donde $X,Y,Z$ no son simultáneamente 0 y definimos la relación de equivalencia:
+\[ Eq: (X,Y,Z)\equiv(X',Y'.Z') \Longleftrightarrow \exists \lambda \in K\ t.q.\ X=\lambda X',\ Y=\lambda Y',\ Z=\lambda Z' \]
+Se define \textit{el plano proyectivo} sobre el cuerpo $K$ como:
+\[
+\mathbb{P}^2(K) = \dfrac{K^3}{Eq}
+\]
 \subsection{Curva elíptica}
 Una \textit{curva elíptica} se define sobre el conjunto de soluciones de la ecuación Weierstrass homogénea de la forma:
 \begin{equation} 
@@ -271,7 +290,11 @@ Definimos la \textit{suma de puntos}, sea $P,Q \in E$, entonces:
 \item Se calcula el punto de corte de la recta y la curva $E$ al que llamaremos $R$.
 \item $P+Q$ se define como el simétrico de $R$ respecto al eje x.
 \end{itemize}
+\begin{figure}[H]
 \includegraphics[scale=1]{img/Curva.png}
+\caption{Suma de puntos}
+\label{Suma de puntos}
+\end{figure}
 \underline{Observación:}\\
 $\left[2\right]P=P+P$ se calcula usando la recta tangente a la curva en el punto $P$, por lo que si la tangente es una recta vertical se considera que $P+P=\cal{O}$.\\
 
@@ -323,7 +346,7 @@ Computamos $\beta = \sqrt{x^3+ax+b}$  $(mod\ p)$. Si la paridad de $\beta$ y $b$
 \cleardoublepage
 \chapter{Clave pública}
 Los esquemas de clave pública se basan en una pareja de claves (clave pública, clave privada), estas claves a diferencia de la criptografía simétrica requieren de su pareja para realizar la operación inversa.\\
-Existen dos usos fundamentales de este tipo de esquemas, el primero donde dos extremos quieren intercambiar información, el emisor usará la clave pública del receptor para cifrar el mensaje y enviarlo, el receptor al ser el único conocedor de su clave privada puede recuperar el mensaje original, el segundo caso donde, para demostrar la autenticidad de un emisor, éste cifra el mensaje con su clave privada y cualquier receptor comprueba la autenticidad del emisor cuando lo descifra con su clave pública, este caso es el que se conoce como \textit{firma digital}.
+Existen dos usos fundamentales de este tipo de esquemas, el primero donde dos extremos quieren intercambiar información, el emisor usará la clave pública del receptor para cifrar el mensaje y enviarlo, el receptor al ser el único conocedor de su clave privada puede recuperar el mensaje original, el segundo caso donde el emisor hace uso de su clave privada y el mensaje para que cualquier receptor pueda validar la identidad del emisor y la integridad del mensaje haciendo uso de la clave pública del emisor, este caso es el que se conoce como \textit{firma digital}.
 
 \section{Intercambio de claves Diffie-Hellman}
 En algunos algoritmos es necesario que partes no autentificadas lleguen a intercambiar claves por un canal no seguro, esto supuso un problema que solventaron Whitfield Diffie y Martin Hellman con su protocolo, se utiliza para acordar claves simétricas en una sesión y esto posteriormente permite los protocolos de comunicación autentificada. Su seguridad tiene origen en el problema del logaritmo discreto ya que, como hemos visto antes en el capítulo\ref{chap:logaritmo discreto}, es fácil de computar y difícil de invertir.\\
@@ -334,7 +357,11 @@ Supongamos que tenemos dos usuarios finales que quieren comunicarse entre sí, se
 \item Bob elige un $b\in \mathbb{Z}_{p-1}$, computa $B = g^b\ mod\ p$ y lo envía a Alice.
 \end{itemize}
 Con esta información ambos extremos son capaces de computar $K = (g)^{ab}\ mod\ p$, ya que Alice puede calcular $K = B^a\ mod\ p$ y Bob $K = A^b\ mod\ p$. Se utilizará $K$ como la clave compartida.\\
-\includegraphics[scale=0.4]{img/Diffie-Hellman.png}\\
+
+\begin{figure}[H]
+\includegraphics[scale=0.45]{img/Diffie-Hellman.png}
+\caption{Intercambio de claves Diffie-Hellman}
+\end{figure}
 No obstante cualquier atacante que quiera conocer la clave $K$ en el canal solo tiene acceso a $g,p,A$ y $B$, por lo que para computar la clave tiene que calcular $a=log_p(A)$ y $b=log_p(B)$ siendo este el logaritmo discreto.\\
 Existen ataques a este protocolo que no están basados en resolver el logaritmo discreto sino en aprovechar que las partes no están autentificadas y por tanto hacer creer a ambos que él es el otro extremo, esto es conocido como \textit{Man-in-the-middle}.\\
 De la misma forma que se aplica este protocolo en su versión original es posible aplicarla sobre el grupo aditivo de las curvas elípticas, este protocolo es conocido como EC-DH y una de las ventajas que nos proporciona es que utilizando la compresión de punto se puede reducir la cantidad de información necesaria para realizar el protocolo con la misma seguridad, reduciendo el ancho de banda y mejorando el rendimiento. Curve25519 es una curva elíptica conocida por ofrecer buen rendimiento.
@@ -349,13 +376,24 @@ Una \textit{funcion hash} es una aplicación que lleva una cadena de bits de cual
 \end{itemize}
 Más adelante veremos como estas funciones son necesarias a la hora de comprobar la integridad de la información, ya que cualquier pequeña modificación en el mensaje se reflejaría al calcular el hash del mismo.
 
-\section{Ejemplo: RSA}
-Como ejemplo de esquema de clave pública vamos a analizar RSA, nombrado así por sus creadores Rivest, Shamir y Adleman, originado en 1979 es uno de los algoritmos más usados tanto para cifrar como para firmar digitalmente.\\
+\section{Cifrado de clave pública}
+Para poder realizar el cifrado de clave pública se deben llevar a cabo varias etapas con la que se pueden definir los distintos algoritmos:
+\begin{itemize}
+\item Generación de claves: En primer lugar se debe acometer la tarea de generar las claves necesarias para el cifrado, estas están basadas en algún problema matemático complejo de invertir, el resultado de esta etapa debe ser la clave privada, que debe ser conocida únicamente por el receptor del mensaje, y la clave pública que debe dejarse a disposición de cualquiera ya que esto no debe comprometer la seguridad del sistema.
+\item Cifrado: Una vez un emisor desea enviar un mensaje, debe hacer uso de la clave pública del receptor para transformar el mensaje como indique el esquema correspondiente para posteriormente enviarlo.
+\item Descifrado: Cuando un receptor ha recibido un mensaje debe hacer uso de su clave privada, que es conocida únicamente por él, para recuperar el mensaje original por medio de las transformaciones que requiera el esquema correspondiente sin que nadie haya podido modificarlo ni leerlo.
+\end{itemize}
+Esto a priori no garantiza la auntenticidad del emisor, no obstante veremos como se solventa este problema en el siguiente apartado.\\
+Se denomina \textit{correción} de un esquema a la propiedad de poder recuperar el mensaje original aplicando el descifrado sobre el mensaje cifrado sin intervención del adversario.
+\subsection{Ejemplo: Cifrado RSA} \label{Cifrado RSA}
+Como ejemplo de esquema de clave pública vamos a analizar RSA, nombrado así por sus creadores Rivest, Shamir y Adleman, ya que es uno de los primeros ,originado en 1979, y además es uno de los algoritmos más usados tanto para cifrar como para firmar digitalmente.\\
 
-\subsection{Cifrado}
 En primer lugar analicemos en que consiste el algoritmo aplicado al cifrado de mensajes entre extremos.\\
 Supongamos dos usuarios finales Alice y Bob. Bob quiere enviar un mensaje a Alice y para ello se va a usar el algoritmo RSA, este consiste en:
 \begin{itemize}
+\item Generación de claves:
+\begin{itemize}
+
 \item Alice elige dos números primos grandes $p$ y $q$ y calcula $N=p\cdot q$.
 \item Alice elige un exponente $e$ de forma que $mcd(e,(p-1)\cdot (q-1))=1$.
 \item En el calculo del exponente para descifrar, Alice usa el algoritmo de Euclides extendido para conocer $d$ en la ecuación:
@@ -363,13 +401,23 @@ Supongamos dos usuarios finales Alice y Bob. Bob quiere enviar un mensaje a Alic
 e\cdot d \equiv 1\ mod\ (p-1)(q-1)\label{eq:congruentes}
 \end{equation}
 \end{itemize}
+
+\end{itemize}
 En este punto la clave pública de Alice es el par $(N,e)$ y su clave privada es la tripleta $(d,p,q)$. Por tanto para intercambiar el mensaje se realizan los siguientes pasos:
+
+\begin{itemize}
+\item Cifrado:
 \begin{itemize}
 \item Bob quiere mandar su mensaje $m$, por lo que cifra el mensaje para obtener $c$ calculando $c=m^e\ mod\ N$.
+\end{itemize}
+\item Descifrado:
+\begin{itemize}
 \item Alice recibe $c$ por lo que para poder leer el mensaje tiene que calcular $m$ de la forma $m=c^d\ mod\ N$.
 \end{itemize}
+\end{itemize}
 
-\underline{Demostración}: $m=c^d\ mod\ N$\\
+\underline{Demostración}: Corrección del esquema\\
+Queremos demostrar que $m=c^d\ mod\ N$. \\
 El orden del grupo $(\mathbb{Z}/N\mathbb{Z})^*$ viene dado por $\phi(N)=(q-1)(p-1)$, por tanto:
 \begin{equation}
 \forall x\in(\mathbb{Z}/N\mathbb{Z})^*: \ x^{(q-1)(p-1)}\equiv 1\ mod\ N\label{reducir}
@@ -383,21 +431,37 @@ c^d&=m^{ed}\ mod\ N\\
 &=m\ mod\ N
 \end{split}
 \]\\
-La seguridad de este algoritmo reside en el problema de factorización, ya que si logramos factorizar $N$ como $p\cdot q$ entonces podremos calcular $d$, no obstante este problema se considera complejo a nivel de cómputo.
+Como queríamos demostrar.\\
 
-\subsection{Firma digital}
-La firma digital es un mecanismo que se usa para verificar el origen de un mensaje, es decir, asegura  la autenticación del emisor y el no repudio. Existen varias implementaciones diferentes de este mecanismo, pero en este caso nos vamos a centrar en la firma con RSA.\\
-Supongamos dos usuarios finales Alice y Bob, Alice quiere enviar un mensaje a Bob, pero Bob tiene que poder asegurarse que el mensaje procede de Alice y nadie lo ha modificado, para ello van a usar la firma digital, Alice firmaría el mensaje:
+\underline{Nota}: La seguridad de este algoritmo reside en el problema de factorización, ya que si logramos factorizar $N$ como $p\cdot q$ entonces podremos calcular $d$, no obstante este problema se considera complejo a nivel de cómputo.
+
+\section{Firma digital}
+La firma digital es un mecanismo que se usa para verificar el origen de un mensaje, es decir, asegura  la autenticación del emisor y el no repudio, además permite también verificar la integridad del mensaje.\\
+Para logar este objetivo se llevan a cabo diferentes etapas que definen los diferentes esquemas, estas son:
+\begin{itemize}
+\item Generación de claves: Al igual que en el cifrado, se debe acometer la tarea de generar las claves necesarias para la firma digital, estas están basadas en algún problema matemático complejo de invertir, el resultado de esta etapa debe ser la clave privada, que debe ser conocida únicamente por el receptor del mensaje, y la clave pública que debe dejarse a disposición de cualquiera ya que esto no debe comprometer la seguridad del sistema.
+\item Firma: Cuando un emisor desea firmar un mensaje, debe hacer uso de la clave privada de la forma que indique el algoritmo para dejar una información a la que llamamos \textit{firma} y que enviaremos junto al mensaje.
+\item Verificación: Haciendo uso del mensaje recibido, la firma y la clave pública del emisor, el receptor puede verificar la autenticidad, integridad y no repudio del mensaje mediante los pasos que se detallen en el algoritmo.
+\end{itemize}
+
+\subsection{Ejemplo: Firma digital con RSA}
+Existen varias implementaciones diferentes de este mecanismo, pero en este caso nos vamos a centrar en la firma con RSA.\\
+Supongamos dos usuarios finales Alice y Bob, Alice quiere enviar un mensaje a Bob, pero Bob tiene que poder asegurarse que el mensaje procede de Alice y nadie lo ha modificado, para ello van a usar la firma digital:
+
+\begin{itemize}
+\item Generación de claves: De la misma forma que se genera en la sección \ref{Cifrado RSA}, Alice genera su clave privada $(N,e)$ y su clave pública $(d,p,q)$.\\
+\item Firma:
 \begin{itemize}
 \item Alice aplica una función hash $h$ al mensaje $m$, quedandose con $r_s=h(m)$.
 \item Alice usa su clave privada $(d,p,q)$ para cifrar $r_s$, esta será la firma del mensaje $S=r_s^d\ mod\ p\cdot q$.
 \item Alice envía el mensaje, que no tiene porque estar cifrado, junto con la firma a Bob.
 \end{itemize}
-Una vez firmado el mensaje Bob podrá verificar la firma de la siguiente forma:
+\item Verificación:
 \begin{itemize}
 \item Bob recibe el mensaje y la firma de Alice y usa la firma para calcular $r_s=S^e\ mod\ N$ con la clave pública de Alice $(e,N)$.
 \item Bob aplica la misma función hash que Alice al mensaje $r_m=h(m)$.
 \item Si $r_s=r_m$ entonces el mensaje queda verificado.
+\end{itemize}
 \end{itemize}
 Dado que Alice tuvo que usar su clave privada para cifrar la firma, no es posible modificar la firma $S$ sin que invalide la verificación, de la misma forma que ocurre en el mensaje ya que no podrías cifrar el nuevo hash.
 
@@ -406,7 +470,10 @@ Dado que Alice tuvo que usar su clave privada para cifrar la firma, no es posibl
 El cifrado basado en identidad es un esquema de clave pública donde la clave de un usuario se obtiene a partir de una información que lo identifique, ya sea su email, número de teléfono, etc...\\
 Este esquema necesita de un generador de claves privadas (PKG), este provee a los usuarios de su clave privada y les da la forma de conocer la clave pública de los demás usuarios a partir de su identidad, el proceso que realiza un usuario final para conocer su clave privada y la clave pública de los demás solo se necesita aplicar una vez. \\
 Si dos usuarios finales quieren intercambiar un mensaje, por ejemplo Alice quiere enviar un mensaje a Bob, entonces Alice usa la clave pública maestra con la identidad de Bob para cifrar el mensaje y lo envía, luego Bob usará su clave privada para descifrar el mensaje, como queda representado en el siguiente diagrama.\\
-\includegraphics[scale=0.7]{img/Identity_Based_Encryption_Steps.png}\\
+\begin{figure}[H]
+\includegraphics[scale=0.6]{img/Identity_Based_Encryption.png}
+\caption{Cifrado basado en identidad}
+\end{figure}
 
 \section{Emparejamiento}
 Dados dos grupos cíclicos aditivos $G_1, G_2$ de orden primo $p$ y un grupo cíclico $G_T$ escrito multiplicativamente, un \textit{emparejamiento} es una aplicación $e: G_1 \times G_2\ \rightarrow\ G_T$ que cumple:
@@ -465,7 +532,8 @@ M = V \oplus H_2(e(d_{ID}, U))
 \]
 
 
-\underline{Demostración}: $M = V \oplus H_2(e(d_{ID}, U))$\\
+\underline{Demostración}: Corrección del esquema.\\
+Se quiere demostrar que $M = V \oplus H_2(e(d_{ID}, U))$ .\\
 Para demostrar que el mecanismo de cifrar y descifrar efectivamente es correcto, hay que probar que el mensaje original puede obtenerse descifrando el mensaje cifrado. Para ello se debe usar la propiedad de bilinearidad del emparejamiento.
 \[
 \begin{split}
@@ -494,8 +562,9 @@ V \oplus H_2(e(d_{ID}, U)) &= V \oplus H_2(e(sQ_{ID}, rP))\\
 
 \cleardoublepage
 \chapter{Conclusiones}
-En la actualidad los mecanismos criptográficos se basan en dos problemas fundamentalmente, el logaritmo discreto que se ha tratado en este estudio y el problema de la factorización de números enteros. Aunque se consideren problemas difíciles en tiempo de cómputo y haya planteado el algoritmo Baby-step/Giant-step de complejidad $\cal{O} $($\sqrt{p}$), esto no significa que no haya algoritmos mejores y que puedan comprometer en un futuro la seguridad de los sistemas basados en estos dos problemas. De hecho existen algoritmos en el paradigma de la computación cuántica capaces de resolver estos problemas con una menor complejidad como el algoritmo de Shor.\\
-La seguridad de los sistemas una vez se implementan crean puntos de ataque que no están contemplados originalmente en el algoritmo, ya sea por la elección de los números primos, ataques de canal lateral o por las funciones hash elegidas. Por lo que un esquema que de forma teórica tiene buenos mecanismos de seguridad puede ser vulnerable cuando se lleva a la practica.
+En las últimas décadas los mecanismos criptográficos se han basado en dos problemas fundamentalmente, el logaritmo discreto que se ha tratado en este estudio y el problema de la factorización de números enteros. Aunque se consideren problemas difíciles en tiempo de cómputo y se haya planteado el algoritmo Baby-step/Giant-step de complejidad $\cal{O} $($\sqrt{p}$), esto no significa que no haya algoritmos mejores y que puedan comprometer en un futuro la seguridad de los sistemas basados en estos dos problemas. De hecho existen algoritmos en el paradigma de la computación cuántica capaces de resolver estos problemas con una menor complejidad como el algoritmo de Shor.\\
+La seguridad de los sistemas una vez se implementan crean puntos de ataque que no están contemplados originalmente en el algoritmo, ya sea por la elección de los números primos, ataques de canal lateral o por las funciones hash elegidas. Por lo que un esquema que de forma teórica tiene buenos mecanismos de seguridad puede ser vulnerable cuando se lleva a la practica.\\
+Este trabajo me ha aportado los fundamentos necesarios para entender el razonamiento detrás de algunos esquemas de cifrado y firma digital, permitiéndome llevar los conceptos teóricos desarrollados en el grado hacia una utilidad real de las matemáticas, además de esto me ha permitido comprender los problemas que enfrentan fuera del ámbito académico los matemáticos que en el caso de este estudio lograron combinar las ramas de álgebra y geometría de una manera ingeniosa para dar lugar a un grupo que no es nada obvio.
 
 
 
@@ -528,8 +597,8 @@ La seguridad de los sistemas una vez se implementan crean puntos de ataque que n
 
 
 \cleardoublepage
-\chapter{Anexo}
-
+\chapter{Anexo: Representación de curvas elípticas}
+Durante mi estudio quería comprender y verificar que las fórmulas que se plantean para la ley de grupo de las curvas elípticas se contrastaban con la idea geométrica de la suma de puntos, por lo que desarrollé el siguiente código que permite representar una curva en el plano afín partiendo de los parámetros $a$ y $b$ de la forma corta de Weierstrass de la curva, así como incorporar puntos a partir de la coordenada $x$ y el signo del punto, para posteriormente poder computar la suma y representarlo como se puede ver en la figura \ref{Suma de puntos}
 \begin{verbatim}
 import numpy as np
 import math
