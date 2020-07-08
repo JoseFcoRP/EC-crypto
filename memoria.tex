@@ -69,7 +69,7 @@
 \vspace{3cm}
 
 \Large
-DOBLE GRADO INGENIERÍA DEL SOFTWARE Y MATEMÁTICAS
+GRADO DE MATEMÁTICAS
 
 \vspace{0.4cm}
 
@@ -156,7 +156,12 @@ Es habitual agrupar los algoritmos según la naturaleza de las claves que son nec
 \item Criptografía simétrica: Estos métodos utilizan la misma clave para cifrar y descifrar mensajes, las distintas partes que intercambian información deben conocer esta clave de antemano, existen distintos algoritmos que ponen esto en practica, uno de los mas conocidos entre los métodos recientes es DES (Data Encryption Standard), diseñado en los años 70 y reemplazado a día de hoy por AES (Advanced Encryption Standard).
 \item Ciptografía asimétrica: También conocida como criptografía de clave pública, se basa en un par de claves, una pública que se debe dejar a disposición de cualquiera y una privada que se debe mantener en secreto. Este tipo de métodos son utilizados, entre otras cosas, para el cifrado basado en identidad y el cifrado basado en certificados.
 \end{itemize}
-
+\section{Estructura del trabajo}
+Para realizar este estudio se empieza mostrando las herramientas matemáticas necesarias para desarrollar algunos de los esquemas fundamentales de clave pública, esto se verá en el capítulo \ref{chap:herramientas}.\\
+Posteriormente se trata en más detalle las curvas elípticas en el capítulo\ref{chap:EC}, que se usarán junto con las herramientas anteriores. En este apartado se hace uso del código proporcionado en el anexo para generar la figura que representa la operación fundamental que se usa en las curvas elípticas.\\
+Una vez presentados los conocimientos básicos con los que se trabaja, se pasa a mostrar los esquemas de clave pública así como algún ejemplo de los mismos en el capítulo\ref{chap:public key}.\\
+Finalmente en el capítulo \ref{chap:identidad} se usa la mayoría de conceptos anteriores para plantear un esquema de clave pública sobre curvas elípticas, el cifrado basado en identidad.\\
+Tras ello se encuentra el apartado de conclusiones donde muestro algunas de las ideas generales que me ha trasmitido este estudio y que he aprendido al realizarlo.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % OBJETIVOS %
@@ -172,6 +177,7 @@ Es habitual agrupar los algoritmos según la naturaleza de las claves que son nec
 
 \cleardoublepage % empezamos en página impar
 \chapter{Herramientas matemáticas}
+\label{chap:herramientas}
 En este apartado se presentan una serie de conceptos y algoritmos necesarios para poder entender el origen de la seguridad de los diferentes esquemas, así como su implementación.
 \section{Grupo}
 Dado un conjunto no vacío de elementos $G$ y una operación $\cdot$ que combina un par de elementos en un tercero, se define grupo al par ($G$,$\cdot$) donde se cumplen las siguientes propiedades:
@@ -188,7 +194,14 @@ Es habitual que los grupos abelianos usen notación aditiva $+$.
 \section{Grupo cíclico}
 Sea $G$ un grupo, se dice que $G$ es un \textit{grupo cíclico} si existe un elemento del grupo $g\in G$ de forma que $G=\left\langle g \right\rangle$, es decir, cualquier elemento del grupo puede expresarse como $g^n$ (o $ng$ si es un grupo aditivo) para algún $n\in\mathbb{Z}$, llamamos entonces a $g$ \textit{generador} de $G$.
 Un ejemplo habitual de grupo cíclico es el grupo aditivo de los números enteros módulo $n$, denotado habitualmente como $\mathbb{Z}/n\mathbb{Z}$, tomando como generador el $1$.\\
-\underline{Lema}: Cada grupo cíclico finito de orden $n$ es isomorfo al grupo $\mathbb{Z}/n\mathbb{Z}$.
+\underline{Lema}: Cada grupo cíclico finito de orden $n$ es isomorfo al grupo $\mathbb{Z}/n\mathbb{Z}$.\\
+\underline{Demostración}:\\
+Sea $G$ un grupo cíclico finito generado por $g$, puesto que $G$ es finito se tiene que $g^n=e$ para algún $n>0$. Asumimos que $n$ sea el menor posible (el orden de $g$).\\
+Se puede escribir $G$ como $\left\lbrace e, g, ..., g^{n-1} \right\rbrace$ donde todos los elementos son distintos, es decir, que si $m_1,m_2 \in \left\lbrace 0, 1, ..., n-1 \right\rbrace$ tal que $m_1>m_2$, entonces $g^{m_1}\not=g^{m_2}$, de no ser así se tendría que $g^{m_1-m_2}=e$ que contradice que $n$ sea el orden de $g$.\\
+Usando el algoritmo de la división se puede escribir cualquier entero $m$ como $m=nq+r$, donde $r=m\ mod\ n$. Por tanto $g^m=(g^n)^qg^r=g^r=g^{m\ mod\ n}$. Definimos $f: \mathbb{Z}_n \rightarrow G$ donde $f(m)=g^m$, esta función corresponde cada elemento uno a uno. Finalmente se puede comprobar que además es un isomorfismo ya que
+\[
+f(m_1)f(m_2)=g^{m_1}g^{m_2}=g^{m_1+m_2}=g^{(m_1+m_2)\ mod\ n}=f(m_1\oplus m_2)
+\]
 
 \section{Logaritmo discreto}
 \label{chap:logaritmo discreto}
@@ -240,6 +253,7 @@ Dado que para calcular los \textit{baby-step} y los \textit{giant-step} son nece
 
 \cleardoublepage
 \chapter{Curvas elípticas} % título del capítulo (se muestra)
+\label{chap:EC}
 En este capítulo se presenta la base de la criptografía sobre curvas elípticas, como hemos visto el problema en el que se va a basar la seguridad de los algoritmos es el logaritmo discreto, este requiere de un grupo cíclico, para ello vamos a utilizar el grupo formado por las curvas elípticas con su operación de suma de puntos que veremos a continuación.
 \label{chap:curvas-elipticas} % identificador del capítulo (no se muestra, es para poder referenciarlo)
 
@@ -252,7 +266,7 @@ donde $X,Y,Z$ no son simultáneamente 0 y definimos la relación de equivalencia:
 \[ Eq: (X,Y,Z)\equiv(X',Y'.Z') \Longleftrightarrow \exists \lambda \in K\ t.q.\ X=\lambda X',\ Y=\lambda Y',\ Z=\lambda Z' \]
 Se define \textit{el plano proyectivo} sobre el cuerpo $K$ como:
 \[
-\mathbb{P}^2(K) = \dfrac{K^3}{Eq}
+\mathbb{P}^2(K) = \dfrac{K^3\backslash(0,0,0)}{Eq}
 \]
 \subsection{Curva elíptica}
 Una \textit{curva elíptica} se define sobre el conjunto de soluciones de la ecuación Weierstrass homogénea de la forma:
@@ -345,6 +359,7 @@ Computamos $\beta = \sqrt{x^3+ax+b}$  $(mod\ p)$. Si la paridad de $\beta$ y $b$
 
 \cleardoublepage
 \chapter{Clave pública}
+\label{chap:public key}
 Los esquemas de clave pública se basan en una pareja de claves (clave pública, clave privada), estas claves a diferencia de la criptografía simétrica requieren de su pareja para realizar la operación inversa.\\
 Existen dos usos fundamentales de este tipo de esquemas, el primero donde dos extremos quieren intercambiar información, el emisor usará la clave pública del receptor para cifrar el mensaje y enviarlo, el receptor al ser el único conocedor de su clave privada puede recuperar el mensaje original, el segundo caso donde el emisor hace uso de su clave privada y el mensaje para que cualquier receptor pueda validar la identidad del emisor y la integridad del mensaje haciendo uso de la clave pública del emisor, este caso es el que se conoce como \textit{firma digital}.
 
@@ -415,7 +430,7 @@ En este punto la clave pública de Alice es el par $(N,e)$ y su clave privada es 
 \item Alice recibe $c$ por lo que para poder leer el mensaje tiene que calcular $m$ de la forma $m=c^d\ mod\ N$.
 \end{itemize}
 \end{itemize}
-
+\underline{Teorema}: El cifrado RSA presentado es correcto.\\
 \underline{Demostración}: Corrección del esquema\\
 Queremos demostrar que $m=c^d\ mod\ N$. \\
 El orden del grupo $(\mathbb{Z}/N\mathbb{Z})^*$ viene dado por $\phi(N)=(q-1)(p-1)$, por tanto:
@@ -467,6 +482,7 @@ Dado que Alice tuvo que usar su clave privada para cifrar la firma, no es posibl
 
 \cleardoublepage
 \chapter{Cifrado basado en identidad}
+\label{chap:identidad}
 El cifrado basado en identidad es un esquema de clave pública donde la clave de un usuario se obtiene a partir de una información que lo identifique, ya sea su email, número de teléfono, etc...\\
 Este esquema necesita de un generador de claves privadas (PKG), este provee a los usuarios de su clave privada y les da la forma de conocer la clave pública de los demás usuarios a partir de su identidad, el proceso que realiza un usuario final para conocer su clave privada y la clave pública de los demás solo se necesita aplicar una vez. \\
 Si dos usuarios finales quieren intercambiar un mensaje, por ejemplo Alice quiere enviar un mensaje a Bob, entonces Alice usa la clave pública maestra con la identidad de Bob para cifrar el mensaje y lo envía, luego Bob usará su clave privada para descifrar el mensaje, como queda representado en el siguiente diagrama.\\
@@ -530,8 +546,7 @@ Sea el mensaje cifrado $C = \langle U,V \rangle \in \cal{C}$ que ha sido computa
 \[
 M = V \oplus H_2(e(d_{ID}, U))
 \]
-
-
+\underline{Teorema}: El cifrado basado en identidad presentado es correcto.\\
 \underline{Demostración}: Corrección del esquema.\\
 Se quiere demostrar que $M = V \oplus H_2(e(d_{ID}, U))$ .\\
 Para demostrar que el mecanismo de cifrar y descifrar efectivamente es correcto, hay que probar que el mensaje original puede obtenerse descifrando el mensaje cifrado. Para ello se debe usar la propiedad de bilinearidad del emparejamiento.
@@ -563,7 +578,7 @@ V \oplus H_2(e(d_{ID}, U)) &= V \oplus H_2(e(sQ_{ID}, rP))\\
 \cleardoublepage
 \chapter{Conclusiones}
 En las últimas décadas los mecanismos criptográficos se han basado en dos problemas fundamentalmente, el logaritmo discreto que se ha tratado en este estudio y el problema de la factorización de números enteros. Aunque se consideren problemas difíciles en tiempo de cómputo y se haya planteado el algoritmo Baby-step/Giant-step de complejidad $\cal{O} $($\sqrt{p}$), esto no significa que no haya algoritmos mejores y que puedan comprometer en un futuro la seguridad de los sistemas basados en estos dos problemas. De hecho existen algoritmos en el paradigma de la computación cuántica capaces de resolver estos problemas con una menor complejidad como el algoritmo de Shor.\\
-La seguridad de los sistemas una vez se implementan crean puntos de ataque que no están contemplados originalmente en el algoritmo, ya sea por la elección de los números primos, ataques de canal lateral o por las funciones hash elegidas. Por lo que un esquema que de forma teórica tiene buenos mecanismos de seguridad puede ser vulnerable cuando se lleva a la practica.\\
+La seguridad de los sistemas una vez se implementan crean puntos de ataque que no están contemplados originalmente en el algoritmo, ya sea por la elección de los números primos, ataques de canal lateral o por las funciones hash elegidas. Por lo que un esquema que de forma teórica tiene buenos mecanismos de seguridad puede ser vulnerable cuando se lleva a la práctica.\\
 Este trabajo me ha aportado los fundamentos necesarios para entender el razonamiento detrás de algunos esquemas de cifrado y firma digital, permitiéndome llevar los conceptos teóricos desarrollados en el grado hacia una utilidad real de las matemáticas, además de esto me ha permitido comprender los problemas que enfrentan fuera del ámbito académico los matemáticos que en el caso de este estudio lograron combinar las ramas de álgebra y geometría de una manera ingeniosa para dar lugar a un grupo que no es nada obvio.
 
 
